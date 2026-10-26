@@ -1,0 +1,420 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: voice
+    description: Voice Diary processing operations
+  - name: supabase
+    description: Supabase connection and schema status
+  - name: auth
+    description: Supabase Auth session operations
+  - name: patient
+    description: Authenticated patient data and offline synchronization
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /voice/transcribe:
+    post:
+      operationId: transcribeVoiceDiary
+      tags: [voice]
+      summary: Transcribe a Voice Diary recording and extract a possible task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoiceDiaryTranscriptionInput"
+      responses:
+        "200":
+          description: Transcription result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceDiaryTranscription"
+        "400":
+          description: Invalid recording payload
+        "413":
+          description: Recording is larger than the supported inline limit
+        "502":
+          description: Gemini transcription failed
+  /supabase/status:
+    get:
+      operationId: supabaseStatus
+      tags: [supabase]
+      summary: Check Supabase connection and Medha AI schema status
+      responses:
+        "200":
+          description: Supabase connection status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SupabaseStatus"
+        "503":
+          description: Supabase could not be reached
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SupabaseStatus"
+  /auth/signup:
+    post:
+      operationId: signUp
+      tags: [auth]
+      summary: Create a Medha AI account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignUpInput"
+      responses:
+        "201":
+          description: Account created with an active session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "202":
+          description: Account created and waiting for email confirmation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Invalid account details
+  /auth/signin:
+    post:
+      operationId: signIn
+      tags: [auth]
+      summary: Sign in to a Medha AI account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignInInput"
+      responses:
+        "200":
+          description: Active session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Invalid credentials
+  /auth/refresh:
+    post:
+      operationId: refreshAuthSession
+      tags: [auth]
+      summary: Refresh an expired access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshInput"
+      responses:
+        "200":
+          description: Refreshed session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /auth/signout:
+    post:
+      operationId: signOut
+      tags: [auth]
+      summary: Sign out of the current session
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Signed out
+        "401":
+          description: Missing or invalid session
+  /auth/me:
+    get:
+      operationId: currentUser
+      tags: [auth]
+      summary: Get the current authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user]
+                properties:
+                  user:
+                    $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Missing or invalid session
+  /me/snapshot:
+    get:
+      operationId: patientSnapshot
+      tags: [patient]
+      summary: Read the authenticated patient's synchronized care data
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Patient snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientSnapshot"
+        "401":
+          description: Missing or invalid session
+  /me/profile:
+    put:
+      operationId: updatePatientProfile
+      tags: [patient]
+      summary: Update the authenticated patient's profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatientProfileInput"
+      responses:
+        "200":
+          description: Updated patient snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientSnapshot"
+        "401":
+          description: Missing or invalid session
+  /me/sync:
+    post:
+      operationId: syncPatientData
+      tags: [patient]
+      summary: Apply queued offline changes for the authenticated patient
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SyncInput"
+      responses:
+        "200":
+          description: Queued changes accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncResult"
+        "401":
+          description: Missing or invalid session
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    SupabaseStatus:
+      type: object
+      properties:
+        provider:
+          type: string
+          example: supabase
+        connected:
+          type: boolean
+        schemaReady:
+          type: boolean
+        message:
+          type: string
+      required:
+        - provider
+        - connected
+        - schemaReady
+        - message
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    VoiceDiaryTranscriptionInput:
+      type: object
+      properties:
+        audioBase64:
+          type: string
+          description: Base64 encoded audio without a data URI prefix
+        mimeType:
+          type: string
+          description: MIME type for the audio recording
+        languageHint:
+          type: string
+          description: Optional spoken language hint
+      required:
+        - audioBase64
+        - mimeType
+    VoiceDiaryTask:
+      type: object
+      properties:
+        title:
+          type: string
+        time:
+          type: string
+        recurrence:
+          type: string
+      required:
+        - title
+        - time
+        - recurrence
+    VoiceDiaryTranscription:
+      type: object
+      properties:
+        transcript:
+          type: string
+        language:
+          type: string
+        possibleTask:
+          oneOf:
+            - $ref: "#/components/schemas/VoiceDiaryTask"
+            - type: "null"
+      required:
+        - transcript
+        - language
+        - possibleTask
+    SignUpInput:
+      type: object
+      required: [email, password, displayName, role]
+      properties:
+        email: { type: string }
+        password: { type: string, minLength: 8 }
+        displayName: { type: string }
+        role:
+          type: string
+          enum: [patient, caregiver]
+    SignInInput:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string }
+        password: { type: string }
+    RefreshInput:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken: { type: string }
+    AuthSession:
+      type: object
+      required: [accessToken, refreshToken, expiresIn, tokenType]
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: [string, "null"] }
+        expiresIn: { type: [number, "null"] }
+        tokenType: { type: [string, "null"] }
+    AuthUser:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string }
+        email: { type: [string, "null"] }
+        user_metadata: { type: object, additionalProperties: true }
+    AuthResponse:
+      type: object
+      required: [session, user]
+      properties:
+        session:
+          oneOf:
+            - $ref: "#/components/schemas/AuthSession"
+            - type: "null"
+        user:
+          oneOf:
+            - $ref: "#/components/schemas/AuthUser"
+            - type: "null"
+    PatientProfileInput:
+      type: object
+      required: [displayName]
+      properties:
+        displayName: { type: string }
+        preferredLanguage: { type: string }
+        age: { type: [number, "null"] }
+        region: { type: [string, "null"] }
+        homeAddress: { type: [string, "null"] }
+        caregiverName: { type: [string, "null"] }
+        caregiverRelationship: { type: [string, "null"] }
+        caregiverPhone: { type: [string, "null"] }
+    SyncOperation:
+      type: object
+      required: [id, entity, action, payload]
+      properties:
+        id: { type: string }
+        entity:
+          type: string
+          enum: [task, notification, diary, game, memory]
+        action:
+          type: string
+          enum: [upsert, delete]
+        payload: { type: object, additionalProperties: true }
+    SyncInput:
+      type: object
+      required: [operations]
+      properties:
+        operations:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/SyncOperation"
+    SyncResult:
+      type: object
+      required: [acceptedOperationIds, syncedAt]
+      properties:
+        acceptedOperationIds:
+          type: array
+          items: { type: string }
+        syncedAt: { type: string, format: date-time }
+    PatientSnapshot:
+      type: object
+      required: [patient, tasks, notifications, diaryEntries, gameProgress, memoryCues, syncedAt]
+      properties:
+        patient:
+          oneOf:
+            - type: object
+              additionalProperties: true
+            - type: "null"
+        tasks:
+          type: array
+          items: { type: object, additionalProperties: true }
+        notifications:
+          type: array
+          items: { type: object, additionalProperties: true }
+        diaryEntries:
+          type: array
+          items: { type: object, additionalProperties: true }
+        gameProgress:
+          type: object
+          additionalProperties: true
+        memoryCues:
+          type: array
+          items: { type: object, additionalProperties: true }
+        syncedAt: { type: string, format: date-time }
+

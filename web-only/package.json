@@ -1,0 +1,17 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev": "pnpm --filter @workspace/medha-caregiver-portal run dev",
+    "build": "pnpm --filter @workspace/medha-caregiver-portal run build",
+    "serve": "pnpm --filter @workspace/medha-caregiver-portal run serve",
+    "typecheck": "pnpm --filter @workspace/medha-caregiver-portal run typecheck"
+  },
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "prettier": "^3.9.6",
+    "typescript": "~5.9.3"
+  }
+}
