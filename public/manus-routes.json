@@ -1,0 +1,6 @@
+{
+  "routes": [
+    { "path": "/", "title": "MEDHA" },
+    { "path": "/demo", "title": "MEDHA Demo" }
+  ]
+}

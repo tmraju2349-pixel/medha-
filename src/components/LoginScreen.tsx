@@ -13,9 +13,11 @@ import {
 } from '../services/storage';
 import { syncAllPatientDataToSupabase } from '../services/supabase/patientDataSync';
 import { MedhaLogo } from './common/MedhaLogo';
+import { isDemoRoute } from '../lib/appMode';
 
 export const LoginScreen: React.FC = () => {
   const { db, login } = useMedha();
+  const demoMode = isDemoRoute();
   const [authMode, setAuthMode] = useState<'signin' | 'register' | 'magiclink'>('signin');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -35,52 +37,43 @@ export const LoginScreen: React.FC = () => {
     setLoading(true);
     setErrorMsg('');
     setSuccessMsg('');
-
     const uClean = u.trim().toLowerCase();
     const eClean = e.trim().toLowerCase();
     const pass = p.trim();
-
-    if (isDemoAccount(uClean) || isDemoAccount(eClean)) {
-      setErrorMsg('This username/email is reserved for demo test accounts. Please choose a unique username/email to create your account.');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      // 1. Create a true blank slate database for this new account
-      // (No data, no schedules, no caregiver until connected, no home zones etc.)
-      const blankDb = createBlankDB(uClean, eClean, targetRole, pass);
-
-      // 2. Register user in user registry so they can log back in anytime
-      registerNewUser(uClean, eClean, pass, targetRole);
-
-      // 3. Persist the blank slate DB in localStorage under their specific user key
-      saveDB(blankDb, uClean);
-
-      // 4. If Supabase is available, sync identity to Supabase in background
-      if (supabase) {
-        supabase.auth
-          .signUp({
-            email: eClean,
-            password: pass,
-            options: {
-              data: {
-                role: targetRole,
-                username: uClean,
-                full_name: u.trim(),
-              },
-            },
-          })
-          .catch((err) => console.debug('Supabase background signup:', err));
+    if (demoMode) {
+      if (isDemoAccount(uClean) || isDemoAccount(eClean)) {
+        setErrorMsg('Demo accounts are available from the demo access buttons below.');
+        setLoading(false);
+        return;
       }
-
-      // 5. Open new account immediately!
+      const blankDb = createBlankDB(uClean, eClean, targetRole, pass);
+      registerNewUser(uClean, eClean, pass, targetRole);
+      saveDB(blankDb, uClean);
       sessionStorage.setItem('smriti_session', targetRole);
       sessionStorage.setItem('smriti_username', uClean);
       login(targetRole, uClean, blankDb);
+      setLoading(false);
+      return;
+    }
+    if (!supabase) {
+      setErrorMsg('Email authentication is not configured. Please add the Supabase connection first.');
+      setLoading(false);
+      return;
+    }
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: eClean,
+        password: pass,
+        options: { data: { role: targetRole, username: uClean, full_name: u.trim() } },
+      });
+      if (error) throw error;
+      if (data.session) {
+        setSuccessMsg('Account created. Opening MEDHA…');
+      } else {
+        setSuccessMsg('Account created. Check your email to confirm your account, then sign in.');
+      }
     } catch (err: any) {
-      console.error('Registration error:', err);
-      setErrorMsg(err.message || 'Failed to create account. Please try again.');
+      setErrorMsg(err.message || 'Could not create the account. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -90,66 +83,55 @@ export const LoginScreen: React.FC = () => {
     setLoading(true);
     setErrorMsg('');
     setSuccessMsg('');
-
     const idClean = identifier.trim().toLowerCase();
     const pass = p.trim();
-    const isDemo = isDemoAccount(idClean);
-
-    // 1. Instant Demo Account Login: loads full preloaded test data immediately
-    if (isDemo && (pass === '123456' || pass === '1234' || !pass)) {
-      sessionStorage.setItem('smriti_session', targetRole);
-      sessionStorage.setItem('smriti_username', idClean);
-      const demoDb = loadDB(idClean);
-      login(targetRole, idClean, demoDb);
-      setLoading(false);
-      return;
-    }
-
-    // 2. Check if user is registered in local registry
-    const registeredUser = findRegisteredUser(idClean);
-    if (registeredUser) {
-      if (registeredUser.password !== pass) {
-        setErrorMsg('Incorrect password. Please try again.');
+    if (demoMode) {
+      const isDemo = isDemoAccount(idClean);
+      if (isDemo && (pass === '123456' || pass === '1234' || !pass)) {
+        sessionStorage.setItem('smriti_session', targetRole);
+        sessionStorage.setItem('smriti_username', idClean);
+        login(targetRole, idClean, loadDB(idClean));
         setLoading(false);
         return;
       }
-      const effectiveRole = registeredUser.role || targetRole;
-      sessionStorage.setItem('smriti_session', effectiveRole);
-      sessionStorage.setItem('smriti_username', registeredUser.username);
-      const userDb = loadDB(registeredUser.username);
-      login(effectiveRole, registeredUser.username, userDb);
-      setLoading(false);
-      return;
-    }
-
-    // 3. If Supabase is connected for custom registered users
-    if (supabase) {
-      const loginEmail = idClean.includes('@')
-        ? idClean
-        : `${idClean}@medha.user`;
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
-        password: pass,
-      });
-
-      if (!error && data?.user) {
-        const userRole = (data.user?.user_metadata?.role as 'patient' | 'caregiver') || targetRole;
-        const localUser = data.user?.user_metadata?.username || idClean;
-        sessionStorage.setItem('smriti_session', userRole);
-        sessionStorage.setItem('smriti_username', localUser.toLowerCase());
-        const userDb = loadDB(localUser);
-        login(userRole, localUser, userDb);
+      const registeredUser = findRegisteredUser(idClean);
+      if (registeredUser && registeredUser.password === pass) {
+        const effectiveRole = registeredUser.role || targetRole;
+        sessionStorage.setItem('smriti_session', effectiveRole);
+        sessionStorage.setItem('smriti_username', registeredUser.username);
+        login(effectiveRole, registeredUser.username, loadDB(registeredUser.username));
         setLoading(false);
         return;
       }
+      setErrorMsg('Use one of the demo accounts shown below.');
+      setLoading(false);
+      return;
     }
-
-    setErrorMsg('Account not found or password incorrect. Please click "Register" to create a new account.');
+    if (!supabase) {
+      setErrorMsg('Email authentication is not configured. Please add the Supabase connection first.');
+      setLoading(false);
+      return;
+    }
+    if (!idClean.includes('@')) {
+      setErrorMsg('Use the email address linked to your MEDHA account.');
+      setLoading(false);
+      return;
+    }
+    const { data, error } = await supabase.auth.signInWithPassword({ email: idClean, password: pass });
+    if (error || !data.user) {
+      setErrorMsg(error?.message || 'Email or password is incorrect.');
+      setLoading(false);
+      return;
+    }
+    setSuccessMsg('Signed in successfully. Opening MEDHA…');
     setLoading(false);
   };
 
   const handleDemoFill = async (u: string, p: string, targetRole: 'patient' | 'caregiver' = 'patient') => {
+    if (!demoMode) {
+      window.location.assign('/demo');
+      return;
+    }
     setAuthMode('signin');
     setUsername(u);
     setPassword(p);
@@ -158,30 +140,30 @@ export const LoginScreen: React.FC = () => {
   };
 
   const handleMagicLink = async () => {
+    if (demoMode) {
+      setErrorMsg('Email links are available on the main sign-in route. Use a demo account here.');
+      return;
+    }
     if (!email.trim() || !email.includes('@')) {
       setErrorMsg('Please enter a valid email address.');
       return;
     }
     if (!supabase) {
-      setErrorMsg('Supabase connection required for Email Magic Link.');
+      setErrorMsg('Email authentication is not configured. Please add the Supabase connection first.');
       return;
     }
-    
     setLoading(true);
     setErrorMsg('');
     setSuccessMsg('');
-
     try {
       const { error } = await supabase.auth.signInWithOtp({
-        email: email.trim(),
-        options: {
-          emailRedirectTo: window.location.origin
-        }
+        email: email.trim().toLowerCase(),
+        options: { emailRedirectTo: window.location.origin },
       });
       if (error) throw error;
-      setSuccessMsg('Magic link sent! Check your email to log in.');
+      setSuccessMsg('Magic link sent. Check your email to sign in.');
     } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to send Magic Link.');
+      setErrorMsg(err.message || 'Failed to send the magic link.');
     } finally {
       setLoading(false);
     }
@@ -217,117 +199,33 @@ export const LoginScreen: React.FC = () => {
   };
 
   const handleGoogleAuth = async () => {
+    if (demoMode) {
+      setErrorMsg('Google sign-in is available on the main route. Use a demo account here.');
+      return;
+    }
     if (!supabase) {
-      setErrorMsg('Google Sign-In requires an active internet connection.');
+      setErrorMsg('Google sign-in is not configured. Please add the Supabase connection first.');
       return;
     }
     setLoading(true);
     setErrorMsg('');
-
-    try {
-      // 1. Pre-check if Google provider is enabled in Supabase without crashing into a raw 400 error page
-      const checkRes = await fetch(`/api/auth/check-google-provider?redirect_to=${encodeURIComponent(window.location.origin)}`).catch(() => null);
-      if (checkRes && checkRes.ok) {
-        const checkData = await checkRes.json();
-        if (checkData.enabled && checkData.authorizeUrl) {
-          // Native OAuth is enabled in Supabase! Navigate to Google
-          window.location.assign(checkData.authorizeUrl);
-          return;
-        } else {
-          // Provider not enabled in Supabase - show helpful assistant modal
-          setLoading(false);
-          setShowGoogleModal(true);
-          return;
-        }
-      }
-
-      // 2. Fallback check using supabase-js client with skipBrowserRedirect
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          skipBrowserRedirect: true,
-          redirectTo: window.location.origin
-        }
-      });
-
-      if (error) {
-        if (error.message?.includes('Unsupported provider') || (error as any).code === 400) {
-          setLoading(false);
-          setShowGoogleModal(true);
-          return;
-        }
-        setErrorMsg(error.message);
-        setLoading(false);
-        return;
-      }
-
-      if (data?.url) {
-        try {
-          const probe = await fetch(data.url);
-          if (probe.status === 400) {
-            setLoading(false);
-            setShowGoogleModal(true);
-            return;
-          }
-          window.location.assign(data.url);
-        } catch {
-          window.location.assign(data.url);
-        }
-      }
-    } catch (err: any) {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    });
+    if (error) {
+      setErrorMsg(error.message || 'Google sign-in could not be started.');
       setLoading(false);
-      setShowGoogleModal(true);
+      return;
+    }
+    if (!data.url) {
+      setErrorMsg('Google sign-in is not enabled for this application.');
+      setLoading(false);
     }
   };
 
   const handleInstantGoogleLogin = async () => {
-    setLoading(true);
-    setErrorMsg('');
-    const targetEmail = (googleEmailInput || 'tmraju2349@gmail.com').trim().toLowerCase();
-    const targetName = (googleNameInput || targetEmail.split('@')[0]).trim();
-    const targetRole = googleRoleChoice;
-
-    if (isDemoAccount(targetEmail)) {
-      // Demo test data login
-      sessionStorage.setItem('smriti_session', targetRole);
-      sessionStorage.setItem('smriti_username', targetEmail);
-      const demoDb = loadDB(targetEmail);
-      login(targetRole, targetEmail, demoDb);
-    } else {
-      // Registered new account: starts with a clean, empty state
-      let registeredUser = findRegisteredUser(targetEmail);
-      if (!registeredUser) {
-        registeredUser = registerNewUser(targetEmail, targetEmail, '123456', targetRole);
-        const blankDb = createBlankDB(targetName, targetEmail, targetRole, '123456');
-        saveDB(blankDb, targetEmail);
-      }
-      sessionStorage.setItem('smriti_session', targetRole);
-      sessionStorage.setItem('smriti_username', targetEmail);
-      const userDb = loadDB(targetEmail);
-      login(targetRole, targetEmail, userDb);
-    }
-
-    // Sync profile into Supabase 'profiles' table for data collection if available
-    if (supabase) {
-      try {
-        const profileId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
-          ? crypto.randomUUID() 
-          : 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12';
-
-        await supabase.from('profiles').upsert({
-          id: profileId,
-          display_name: targetName,
-          role: targetRole,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
-      } catch (e) {
-        console.debug('Supabase profile collection notice:', e);
-      }
-    }
-
-    setShowGoogleModal(false);
-    setSuccessMsg(`Welcome, ${targetName}! Logged in as ${targetRole}.`);
-    setLoading(false);
+    setErrorMsg('Use the Google button to authenticate with your real Google account.');
   };
 
   return (

@@ -115,7 +115,10 @@ export function registerNewUser(
   return record;
 }
 
-export function getActiveUserKey(userOrEmail?: string): string {
+export function getActiveUserKey(userOrEmail?: string, stableUserId?: string): string {
+  const sessionUserId = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('smriti_user_id') : null;
+  if (sessionUserId && sessionUserId !== 'demo') return `smriti_user_${sessionUserId}`;
+  if (stableUserId && stableUserId !== 'demo') return `smriti_user_${stableUserId}`;
   const identifier =
     userOrEmail || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('smriti_username') : null);
   if (!identifier || isDemoAccount(identifier)) return DBKEY;
@@ -459,11 +462,11 @@ export function seedDB(): MedhaDB {
   };
 }
 
-export function loadDB(userOrEmail?: string): MedhaDB {
+export function loadDB(userOrEmail?: string, stableUserId?: string): MedhaDB {
   const activeIdentifier =
     userOrEmail || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('smriti_username') : '') || '';
   const isDemo = isDemoAccount(activeIdentifier);
-  const targetKey = getActiveUserKey(activeIdentifier);
+  const targetKey = getActiveUserKey(activeIdentifier, stableUserId);
 
   try {
     const raw = localStorage.getItem(targetKey);
@@ -561,10 +564,10 @@ export function loadDB(userOrEmail?: string): MedhaDB {
   }
 }
 
-export function saveDB(data: MedhaDB, userOrEmail?: string): void {
+export function saveDB(data: MedhaDB, userOrEmail?: string, stableUserId?: string): void {
   const activeIdentifier =
     userOrEmail || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('smriti_username') : '') || '';
-  const targetKey = getActiveUserKey(activeIdentifier);
+  const targetKey = getActiveUserKey(activeIdentifier, stableUserId);
 
   try {
     localStorage.setItem(targetKey, JSON.stringify(data));

@@ -16,6 +16,7 @@ import {
   isEmergencySirenMuted,
 } from '../services/notificationService';
 import { realtimeSync } from '../services/realtimeSync';
+import { isDemoRoute } from '../lib/appMode';
 
 export interface ToastItem {
   id: number;
@@ -186,6 +187,7 @@ export function getAccuracyTolerance(accuracy?: number | null): number {
 }
 
 export const MedhaProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const demoMode = isDemoRoute();
   const [db, setDb] = useState<MedhaDB>(() => loadDB());
   const [currentUser, setCurrentUser] = useState<'patient' | 'caregiver' | null>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
@@ -217,12 +219,23 @@ export const MedhaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Supabase Auth Listener
   useEffect(() => {
-    if (!supabase) {
-      // Fallback local auth initialization
-      const s = sessionStorage.getItem('smriti_session');
-      if (s === 'patient' || s === 'caregiver') {
-        setCurrentUser(s);
+    if (demoMode) {
+      const demoRole = sessionStorage.getItem('smriti_session');
+      const demoUser = sessionStorage.getItem('smriti_username');
+      sessionStorage.removeItem('smriti_user_id');
+      if ((demoRole === 'patient' || demoRole === 'caregiver') && isDemoAccount(demoUser)) {
+        setCurrentUser(demoRole);
+        setDb(loadDB(demoUser || demoRole));
+      } else {
+        sessionStorage.removeItem('smriti_session');
+        sessionStorage.removeItem('smriti_username');
+        setCurrentUser(null);
       }
+      setAuthLoading(false);
+      return;
+    }
+    if (!supabase) {
+      setCurrentUser(null);
       setAuthLoading(false);
       return;
     }
@@ -354,25 +367,16 @@ export const MedhaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       if (session?.user) {
 
-        const role = session.user.user_metadata?.role || 'patient';
-        setCurrentUser(role as 'patient' | 'caregiver');
-        
         // Ensure user is stored locally for offline fallback and display
         const email = session.user.email || '';
         const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || email.split('@')[0] || 'User';
-        setDb((prev) => {
-          const next = { ...prev };
-          const existing = next.users.find(u => u.username === email);
-          if (!existing && email) {
-            next.users = [...next.users, { username: email, password: '', role: role as 'patient' | 'caregiver', name, phone: '' }];
-            saveDB(next);
-          } else if (existing && !existing.name && name) {
-            existing.name = name;
-            saveDB(next);
-          }
-          return next;
-        });
-        
+        const role = session.user.user_metadata?.role === 'caregiver' ? 'caregiver' : 'patient';
+        sessionStorage.setItem('smriti_user_id', session.user.id);
+        sessionStorage.setItem('smriti_username', email.toLowerCase());
+        sessionStorage.setItem('smriti_session', role);
+        setCurrentUser(role as 'patient' | 'caregiver');
+        setDb(loadDB(email, session.user.id));
+
         syncManager.triggerSync();
       }
     };
@@ -383,14 +387,6 @@ export const MedhaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       if (session?.user) {
         syncUserLocally(session);
-      } else {
-        const localRole = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('smriti_session') : null;
-        const localUser = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('smriti_username') : null;
-        if (localRole === 'patient' || localRole === 'caregiver') {
-          setCurrentUser(localRole);
-          const loaded = loadDB(localUser || undefined);
-          setDb(loaded);
-        }
       }
       setAuthLoading(false);
     });
@@ -399,10 +395,10 @@ export const MedhaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (session?.user) {
         syncUserLocally(session);
       } else {
-        const localRole = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('smriti_session') : null;
-        if (!localRole) {
-          setCurrentUser(null);
-        }
+        sessionStorage.removeItem('smriti_user_id');
+        sessionStorage.removeItem('smriti_username');
+        sessionStorage.removeItem('smriti_session');
+        setCurrentUser(null);
       }
     });
 
@@ -1047,12 +1043,17 @@ export const MedhaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const logout = async () => {
-    if (supabase) {
+    if (supabase && !demoMode) {
       await supabase.auth.signOut().catch(() => {});
     }
     sessionStorage.clear();
     setCurrentUser(null);
     setDb(seedDB());
+    if (demoMode) {
+      window.location.assign('/demo');
+    } else {
+      window.location.assign('/');
+    }
   };
 
   const setPage = (page: string) => {
