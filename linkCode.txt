@@ -1,0 +1,88 @@
+  const linkPatientByCode = useCallback((codeOrQr: string, relationship = 'Primary Caregiver') => {
+    const parsed = parsePatientQRPayload(codeOrQr);
+    const searchCode = (parsed.code || codeOrQr).trim().toUpperCase();
+    const searchId = parsed.patientId?.trim();
+
+    const allPatients = db.patients || [];
+    // Match by code or id
+    const foundPatient = allPatients.find(
+      (p) => (searchId && p.id === searchId) || p.code.toUpperCase() === searchCode
+    );
+
+    if (!foundPatient) {
+      // If code was from a remote or new patient not yet in local array, but valid format
+      if (/^MED-\d{3,4}$/i.test(searchCode)) {
+        const newPatient: PatientProfileRecord = {
+          id: searchId || generatePatientId(),
+          code: searchCode,
+          name: parsed.name || `Patient (${searchCode})`,
+          age: parsed.age || 70,
+          stage: 'Mild',
+          city: parsed.city || 'Assam',
+          avatar: '👴',
+          phone: '',
+          emergencyContact: 'Caregiver',
+          emergencyPhone: '',
+          primaryCaregiverId: 'CRG-4401-POOJA',
+          linkedCaregiverIds: ['CRG-4401-POOJA'],
+          createdAt: Date.now(),
+        };
+
+        const newLink: CaregiverPatientLink = {
+          id: `LNK-${Date.now().toString().slice(-4)}`,
+          caregiverId: 'CRG-4401-POOJA',
+          patientId: newPatient.id,
+          pairingCode: searchCode,
+          status: 'active',
+          relationship,
+          connectedAt: Date.now(),
+        };
+
+        updateDb((prev) => ({
+          ...prev,
+          patients: [...(prev.patients || []), newPatient],
+          activePatientId: newPatient.id,
+          caregiverPatientLinks: [...(prev.caregiverPatientLinks || []), newLink],
+        }));
+        setActivePatientIdState(newPatient.id);
+        addToast(`Linked and connected to ${newPatient.name}! 🤝`, '✅');
+        return { success: true, message: `Successfully connected to ${newPatient.name}`, patient: newPatient };
+      }
+
+      return {
+        success: false,
+        message: 'Invalid pairing code or patient not found. Please verify the code or QR.',
+      };
+    }
+
+    // Check if already linked
+    const existingLinks = db.caregiverPatientLinks || [];
+    const isAlreadyLinked = existingLinks.some((l) => l.patientId === foundPatient.id && l.status === 'active');
+
+    if (!isAlreadyLinked) {
+      const newLink: CaregiverPatientLink = {
+        id: `LNK-${Date.now().toString().slice(-4)}`,
+        caregiverId: 'CRG-4401-POOJA',
+        patientId: foundPatient.id,
+        pairingCode: foundPatient.code,
+        status: 'active',
+        relationship,
+        connectedAt: Date.now(),
+      };
+
+      updateDb((prev) => ({
+        ...prev,
+        activePatientId: foundPatient.id,
+        caregiverPatientLinks: [...(prev.caregiverPatientLinks || []), newLink],
+      }));
+    }
+
+    setActivePatientIdState(foundPatient.id);
+    addToast(`Connected to ${foundPatient.name} (${foundPatient.code}) 🤝`, '✅');
+    return { success: true, message: `Connected to ${foundPatient.name}`, patient: foundPatient };
+  }, [db.patients, db.caregiverPatientLinks, addToast, updateDb]);
+
+  const addNewPatient = useCallback((patientData: Omit<PatientProfileRecord, 'id' | 'code' | 'createdAt'>) => {
+    const newId = generatePatientId();
+    const newCode = generatePairingCode();
+    const newPatient: PatientProfileRecord = {

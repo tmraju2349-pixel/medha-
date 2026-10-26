@@ -1,0 +1,10 @@
+--- src/context/MedhaContext.tsx
++++ src/context/MedhaContext.tsx
+@@ -166,6 +166,7 @@
+         } catch (e) {
+           console.warn('Could not store user in Supabase users table:', e);
+         }
++      }
+ 
+       if (session?.user) {
+         const role = session.user.user_metadata?.role || 'patient';

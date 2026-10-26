@@ -1,0 +1,373 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #FAF6EF;
+  --color-inkc: #2B2320;
+  --color-mut: #8A7E72;
+  --color-linec: #ECE3D6;
+  --color-tea: #0E7C66;
+  --color-tea-dark: #0A5C4C;
+  --color-tea-deep: #074236;
+  --color-goldc: #E3A63B;
+  --color-dang: #C2452D;
+  --color-skyc: #3E7CB1;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #2B2320;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #2B2320;
+  --color-border: #E5DEC9;
+  --color-secondary: #F6F2EA;
+  --color-secondary-foreground: #2B2320;
+  --color-muted: #8A7E72;
+  --color-muted-foreground: #63584E;
+  --color-primary: #0E7C66;
+  --color-primary-foreground: #FFFFFF;
+  --color-accent: #E3A63B;
+  --color-accent-foreground: #2B2320;
+  --color-destructive: #C2452D;
+  --color-destructive-foreground: #FFFFFF;
+  --color-foreground: #2B2320;
+  --color-background: #FAF6EF;
+  --font-display: Fraunces, "Noto Serif Bengali", serif;
+  --font-body: "Plus Jakarta Sans", "Hind Siliguri", "Noto Sans Bengali", sans-serif;
+  --shadow-soft: 0 14px 40px -18px rgba(43,35,32,.28);
+  --shadow-lift: 0 24px 60px -24px rgba(10,92,76,.35);
+}
+
+:root {
+  --bg: #FAF6EF;
+  --card: #FFFFFF;
+  --ink: #2B2320;
+  --muted: #8A7E72;
+  --line: #ECE3D6;
+  --brand: #0E7C66;
+  --brand-ink: #fff;
+  --gold: #E3A63B;
+  --danger: #C2452D;
+}
+
+body.contrast {
+  --bg: #FFFFFF;
+  --card: #FFFFFF;
+  --ink: #000000;
+  --muted: #1a1a1a;
+  --line: #111111;
+  --brand: #004D3E;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', 'Hind Siliguri', 'Noto Sans Bengali', sans-serif;
+  overscroll-behavior-y: none;
+}
+
+html {
+  transition: font-size 0.2s ease;
+}
+
+html[data-ts="sm"], body[data-ts="sm"] {
+  font-size: 14px;
+}
+
+html[data-ts="md"], body[data-ts="md"] {
+  font-size: 16px;
+}
+
+html[data-ts="lg"], body[data-ts="lg"] {
+  font-size: 19px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 1.35rem;
+  box-shadow: 0 14px 40px -20px rgba(43,35,32,.25);
+}
+
+.ink { color: var(--ink); }
+.muted { color: var(--muted); }
+
+.btn-p {
+  background: linear-gradient(135deg, var(--brand), #0A5C4C);
+  color: var(--brand-ink);
+  border-radius: 1rem;
+  font-weight: 700;
+  transition: .25s;
+  box-shadow: 0 12px 26px -12px rgba(14,124,102,.55);
+}
+.btn-p:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px -12px rgba(14,124,102,.6);
+}
+.btn-p:active {
+  transform: scale(.97);
+}
+
+.btn-g {
+  background: linear-gradient(135deg, #F0B95A, var(--gold));
+  color: #3A2A08;
+  border-radius: 1rem;
+  font-weight: 800;
+  transition: .25s;
+  box-shadow: 0 12px 26px -14px rgba(227,166,59,.7);
+}
+.btn-g:hover {
+  transform: translateY(-2px);
+}
+
+.chip {
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  font-weight: 600;
+  transition: .2s;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .2rem;
+  color: var(--muted);
+  transition: .25s;
+  border-radius: .9rem;
+  padding: .45rem .2rem;
+}
+.nav-item.active {
+  color: #fff;
+  background: linear-gradient(140deg, var(--brand), #0A5C4C);
+  box-shadow: 0 10px 22px -10px rgba(14,124,102,.6);
+}
+.nav-item:hover { color: var(--brand); }
+.nav-item.active:hover { color: #fff; }
+
+.page { display: block; animation: fadeUp .38s cubic-bezier(.2,.7,.3,1); }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes popIn { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
+.pop { animation: popIn .35s cubic-bezier(.2,.8,.3,1.1); }
+.weave {
+  background-image: repeating-linear-gradient(90deg, var(--gold) 0 14px, #0E7C66 14px 28px, transparent 28px 56px);
+  opacity: .9;
+}
+
+/* ---- Memory Book 3D ---- */
+.book-stage { perspective: 1900px; }
+
+.memory-book-shell {
+  background: radial-gradient(circle at 12% 10%, #fffdf7 0, #f7efe2 42%, #efe2cf 100%);
+  border: 1px solid #e6d5bc;
+  box-shadow: 0 24px 55px rgba(74,55,30,.12);
+}
+.bk-face { background: linear-gradient(115deg, #fffefa 0%, #fbf3e6 100%); }
+.bk-face:after {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(205,173,126,.28);
+  border-radius: 0 1rem 1rem 0;
+  pointer-events: none;
+}
+.family-portrait { object-position: center 24%; background: #ead9bd; }
+@media(max-width: 640px) {
+  .bk-face:after { inset: 8px; }
+  .family-portrait { width: 4.5rem; height: 4.5rem; }
+}
+
+.bk-page {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition: transform .85s cubic-bezier(.35,.1,.2,1);
+  border-radius: 0 1.2rem 1.2rem 0;
+  overflow: hidden;
+}
+.bk-page.flipped {
+  transform: rotateY(-158deg);
+  pointer-events: none;
+}
+.bk-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: linear-gradient(115deg, #FFFDF8, #F7EFE2);
+  border-radius: 0 1.2rem 1.2rem 0;
+  border: 1px solid #E7DCC8;
+  border-left: none;
+  box-shadow: inset -14px 0 26px -18px rgba(90,70,40,.35);
+}
+.bk-face.back {
+  transform: rotateY(180deg);
+  border-radius: 1.2rem 0 0 1.2rem;
+  border-left: 1px solid #E7DCC8;
+  border-right: none;
+  background: linear-gradient(115deg, #F7EFE2, #FFFDF8);
+}
+.bk-spine {
+  position: absolute;
+  left: -1px;
+  top: 4%;
+  bottom: 4%;
+  width: 14px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #0A5C4C, #0E7C66 45%, #0A5C4C);
+  z-index: 5;
+}
+
+.game-overlay-shell iframe {
+  display: block;
+  width: 100%;
+  height: calc(96vh - 112px);
+  min-height: 420px;
+  border-radius: 1rem;
+}
+@media(max-width: 640px) {
+  .game-overlay-shell { height: 98vh; padding: .9rem; }
+  .game-overlay-shell iframe { height: calc(98vh - 96px); min-height: 360px; }
+}
+
+/* ---- Match cards ---- */
+.mm-card { aspect-ratio: 1; perspective: 700px; cursor: pointer; }
+.mm-in {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform .5s cubic-bezier(.3,.7,.3,1);
+}
+.mm-card.flipped .mm-in, .mm-card.matched .mm-in { transform: rotateY(180deg); }
+.mm-f {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+.mm-b {
+  transform: rotateY(180deg);
+  background: linear-gradient(140deg, #0E7C66, #0A5C4C);
+  color: #fff;
+  font-size: 2rem;
+}
+.mm-card.matched .mm-b { outline: 4px solid #E3A63B; outline-offset: -4px; }
+
+/* ---- Sequence pads ---- */
+.pad {
+  aspect-ratio: 1;
+  border-radius: 1.2rem;
+  transition: .15s;
+  cursor: pointer;
+  filter: brightness(.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+.pad.lit {
+  filter: brightness(1.25);
+  transform: scale(1.05);
+  box-shadow: 0 0 0 6px rgba(255,255,255,.35), 0 14px 30px -10px rgba(0,0,0,.4);
+}
+
+@keyframes micPulse {
+  0% { box-shadow: 0 0 0 0 rgba(14,124,102,.5); }
+  70% { box-shadow: 0 0 0 26px rgba(14,124,102,0); }
+  100% { box-shadow: 0 0 0 0 rgba(14,124,102,0); }
+}
+.mic-live {
+  animation: micPulse 1.6s infinite;
+  background: linear-gradient(135deg, #D65A3F, #C2452D) !important;
+}
+.sos-pulse { animation: micPulse 1.2s infinite; }
+
+@keyframes markerPing { 0% { r: 8; opacity: .8; } 100% { r: 30; opacity: 0; } }
+.marker-ping { animation: markerPing 1.8s infinite; }
+
+input[type=range] { accent-color: #0E7C66; }
+.ed[contenteditable="true"] {
+  outline: 2px dashed #E3A63B;
+  outline-offset: 2px;
+  border-radius: .4rem;
+  padding: 0 .3rem;
+  background: #FFF8E8;
+}
+.glass {
+  backdrop-filter: blur(14px);
+  background: rgba(250,246,239,.85);
+}
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-thumb { background: #d8cdba; border-radius: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+.toast { animation: toastIn .4s cubic-bezier(.2,.8,.3,1.1); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(-16px) scale(.95); } to { opacity: 1; transform: none; } }
+.glass-drop { animation: drop .5s cubic-bezier(.3,1.4,.5,1); }
+@keyframes drop { from { transform: translateY(-18px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+:focus-visible { outline: 3px solid #E3A63B; outline-offset: 2px; border-radius: .5rem; }
+.proverb::before { content: '“'; }
+.proverb::after { content: '”'; }
+
+/* ---- Living Botanical Memory Tree Styles ---- */
+.tree-root-card {
+  background: linear-gradient(135deg, #074236 0%, #0A5C4C 50%, #0E7C66 100%);
+  color: #FFFFFF;
+  border: 2px solid rgba(227, 166, 59, 0.45);
+  box-shadow: 0 16px 36px -12px rgba(7, 66, 54, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+.tree-node-card {
+  background: #FFFFFF;
+  color: #2B2320;
+  border: 1.5px solid #E5DEC9;
+  box-shadow: 0 10px 24px -10px rgba(43, 35, 32, 0.12), 0 2px 6px -2px rgba(43, 35, 32, 0.05);
+}
+
+.tree-node-card:hover {
+  border-color: #0E7C66;
+  box-shadow: 0 16px 32px -12px rgba(14, 124, 102, 0.22);
+}
+
+.connector-trunk {
+  width: 4px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #0E7C66 0%, #E3A63B 100%);
+  box-shadow: 0 0 8px rgba(14, 124, 102, 0.25);
+}
+
+.connector-rail {
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, transparent 0%, #0E7C66 8%, #E3A63B 50%, #0E7C66 92%, transparent 100%);
+  box-shadow: 0 0 8px rgba(227, 166, 59, 0.25);
+}
+
+.connector-drop {
+  width: 3.5px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #E3A63B 0%, #0E7C66 100%);
+}
+
+@keyframes matchPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(227, 166, 59, 0.6); }
+  50% { box-shadow: 0 0 0 8px rgba(227, 166, 59, 0); }
+}
+.animate-match-pulse {
+  animation: matchPulse 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Solid non-transparent card for tree preview and inspection modal */
+.tree-preview-modal {
+  background-color: #FFFFFF !important;
+  color: #2B2320 !important;
+  border: 2px solid #E5DEC9 !important;
+  box-shadow: 0 25px 50px -12px rgba(43, 35, 32, 0.35), 0 0 0 1px rgba(229, 222, 201, 0.6) !important;
+  opacity: 1 !important;
+}
+

@@ -1,0 +1,74 @@
+<section id="loginScreen" class="min-h-screen flex">
+  <!-- Left art panel -->
+  <div class="hidden lg:flex w-[46%] relative overflow-hidden" style="background:linear-gradient(160deg,#074236,#0E7C66 55%,#12907A)">
+    <svg class="absolute inset-0 w-full h-full" viewBox="0 0 500 800" preserveAspectRatio="xMidYMid slice">
+      <circle cx="120" cy="120" r="60" fill="#E3A63B" opacity=".9"/>
+      <circle cx="120" cy="120" r="90" fill="none" stroke="#E3A63B" stroke-width="2" opacity=".4"/>
+      <path d="M-20 560 Q120 470 260 560 T540 560 V800 H-20 Z" fill="#0A5C4C"/>
+      <path d="M-20 620 Q130 540 280 620 T560 620 V800 H-20 Z" fill="#0E7C66"/>
+      <path d="M40 700 h420" stroke="#12907A" stroke-width="3" stroke-dasharray="4 18" opacity=".6"/>
+      <path d="M60 730 h380" stroke="#12907A" stroke-width="3" stroke-dasharray="4 18" opacity=".4"/>
+      <path d="M100 760 h300" stroke="#12907A" stroke-width="3" stroke-dasharray="4 18" opacity=".3"/>
+      <!-- rhino silhouette -->
+      <path d="M150 545 q-18 8 -22 30 q-2 14 8 22 q14 10 44 10 h120 q30 0 40 -16 q6 -10 -2 -18 q-10 -10 -34 -12 q-6 -22 -30 -28 q-26 -7 -48 4 q-16 8 -22 22 q-26 2 -40 0 q-10 -10 -14 -14 z" fill="#074236" opacity=".95"/>
+      <path d="M170 540 l8 -14 l6 14 M196 536 l7 -12 l7 12" stroke="#074236" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <!-- river -->
+      <path d="M-20 480 C140 440 320 520 520 470" stroke="#9AD7C8" stroke-width="26" fill="none" opacity=".35" stroke-linecap="round"/>
+      <!-- orchids -->
+      <g font-size="26"><text x="60" y="240">🌺</text><text x="420" y="200">🪷</text><text x="380" y="640" font-size="30">🍵</text><text x="70" y="420">🍃</text></g>
+    </svg>
+    <div class="relative z-10 p-12 flex flex-col justify-between text-white w-full">
+      <div>
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center text-2xl">🧠</div>
+          <div><p class="font-display text-2xl font-bold">MEDHA<span class="text-[#F2C063]">-AI</span></p>
+          <p class="text-xs tracking-widest uppercase text-white/70">স্মৃতি • Memory Care</p></div>
+        </div>
+      </div>
+      <div>
+        <h1 class="font-display text-5xl font-bold leading-tight">Every memory<br/>deserves a<br/><span class="text-[#F2C063] italic">second spring.</span></h1>
+        <p class="mt-5 text-white/80 max-w-sm text-sm leading-relaxed">An AI companion for elders of the North East — adaptive brain games, a listening diary, a living memory book, and a guardian that never sleeps.</p>
+        <div class="mt-6 flex gap-2 flex-wrap text-[11px] font-semibold">
+          <span class="px-3 py-1.5 rounded-full bg-white/12 border border-white/20">🎙 Voice in 4 languages</span>
+          <span class="px-3 py-1.5 rounded-full bg-white/12 border border-white/20">📶 Works offline</span>
+          <span class="px-3 py-1.5 rounded-full bg-white/12 border border-white/20">🛡 Geo-safe SOS</span>
+        </div>
+      </div>
+      <p class="text-white/50 text-xs">Made with ❤️ for the hills & valleys of NER • Demo build</p>
+    </div>
+  </div>
+  <!-- Form panel -->
+  <div class="flex-1 flex items-center justify-center p-6">
+    <div class="w-full max-w-md pop">
+      <div class="lg:hidden flex items-center gap-3 mb-8">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl text-white" style="background:linear-gradient(135deg,#0E7C66,#0A5C4C)">🧠</div>
+        <div><p class="font-display text-xl font-bold ink">MEDHA<span class="text-[#0E7C66]">-AI</span></p><p class="text-[10px] tracking-widest uppercase muted">Memory Health Assistant</p></div>
+      </div>
+      <h2 class="font-display text-3xl font-bold ink">Welcome back</h2>
+      <p class="muted mt-1 text-sm">Sign in to continue caring.</p>
+      <form id="loginForm" class="mt-8 space-y-4">
+        <div>
+          <label class="text-xs font-bold uppercase tracking-wider muted">Username</label>
+          <input id="loginUser" autocomplete="username" class="mt-1.5 w-full px-4 py-3.5 rounded-xl border-2 bg-white text-lg" style="border-color:var(--line)" placeholder="e.g. patient"/>
+        </div>
+        <div>
+          <label class="text-xs font-bold uppercase tracking-wider muted">Password</label>
+          <div class="relative mt-1.5">
+            <input id="loginPass" type="password" autocomplete="current-password" class="w-full px-4 py-3.5 pr-12 rounded-xl border-2 bg-white text-lg" style="border-color:var(--line)" placeholder="••••"/>
+            <button type="button" id="togglePass" class="absolute right-3 top-1/2 -translate-y-1/2 muted" aria-label="Show password">👁</button>
+          </div>
+        </div>
+        <p id="loginErr" class="hidden text-sm font-semibold" style="color:var(--danger)"></p>
+        <button class="btn-p w-full py-4 text-lg">Sign in →</button>
+      </form>
+      <div class="mt-6 card p-4">
+        <p class="text-xs font-bold uppercase tracking-wider muted mb-3">Demo accounts — tap to fill</p>
+        <div class="grid grid-cols-2 gap-3">
+          <button class="demo-fill chip py-3 px-3 text-sm bg-white" data-u="patient" data-p="1234"><span class="text-xl block">👵</span>Patient<br/><span class="muted text-xs">patient / 1234</span></button>
+          <button class="demo-fill chip py-3 px-3 text-sm bg-white" data-u="caregiver" data-p="1234"><span class="text-xl block">👩‍⚕️</span>Caregiver<br/><span class="muted text-xs">caregiver / 1234</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+

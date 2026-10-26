@@ -1,0 +1,305 @@
+<div id="patientApp" class="hidden min-h-screen">
+  <!-- Sidebar (desktop) -->
+  <aside class="hidden lg:flex flex-col fixed inset-y-0 left-0 w-64 bg-white border-r z-40" style="border-color:var(--line)">
+    <div class="p-5 flex items-center gap-3">
+      <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl text-white shrink-0" style="background:linear-gradient(135deg,#0E7C66,#0A5C4C)">🧠</div>
+      <div><p class="font-display text-lg font-bold ink leading-none">MEDHA-AI</p><p class="text-[10px] tracking-widest uppercase muted mt-1">Memory health assistant</p></div>
+    </div>
+    <div class="weave h-1.5 mx-5 rounded-full"></div>
+    <nav class="mt-5 px-3 space-y-1.5 flex-1" id="sideNav">
+      <button data-page="home" class="nav-item active w-full !flex-row !gap-3 px-4 py-3 text-sm font-bold">🏠 <span data-i18n="nav_home">Home</span></button>
+      <button data-page="games" class="nav-item w-full !flex-row !gap-3 px-4 py-3 text-sm font-bold">🎮 <span data-i18n="nav_games">Brain Games</span></button>
+      <button data-page="diary" class="nav-item w-full !flex-row !gap-3 px-4 py-3 text-sm font-bold">🎙 <span data-i18n="nav_diary">Voice Diary</span></button>
+      <button data-page="book" class="nav-item w-full !flex-row !gap-3 px-4 py-3 text-sm font-bold">📖 <span data-i18n="nav_book">Memory Book</span></button>
+      <button data-page="geo" class="nav-item w-full !flex-row !gap-3 px-4 py-3 text-sm font-bold">🛡 <span data-i18n="nav_guard">Geofencing</span></button>
+      <button data-page="settings" class="nav-item w-full !flex-row !gap-3 px-4 py-3 text-sm font-bold">⚙️ <span data-i18n="nav_settings">Settings</span></button>
+    </nav>
+    <div class="p-4">
+      <div class="card p-3 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-[#F3E7CE] flex items-center justify-center text-lg">👤</div>
+        <div class="min-w-0"><p id="sideName" class="font-bold text-sm ink truncate">Biren Saikia</p><button id="logoutBtn1" class="text-xs font-semibold" style="color:var(--danger)">Sign out</button></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="lg:pl-64">
+    <!-- Header -->
+    <header class="sticky top-0 z-30 glass border-b" style="border-color:var(--line)">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
+        <div class="lg:hidden w-10 h-10 rounded-xl flex items-center justify-center text-lg text-white shrink-0" style="background:linear-gradient(135deg,#0E7C66,#0A5C4C)">🧠</div>
+        <div class="min-w-0 flex-1">
+          <p id="hdrGreeting" class="font-display font-bold text-lg ink truncate leading-tight">Good morning</p>
+          <p id="hdrDate" class="text-xs muted truncate"></p>
+        </div>
+        <button id="netPill" class="chip px-2.5 py-1.5 text-xs font-bold bg-white" title="Toggle offline demo">
+          <span id="netDot" class="inline-block w-2 h-2 rounded-full mr-1.5 bg-emerald-500"></span><span id="netLabel">Online</span>
+        </button>
+        <button id="voiceHdrBtn" class="w-10 h-10 rounded-xl card flex items-center justify-center text-lg" aria-label="Read page aloud" title="Read aloud">🔊</button>
+        <div class="relative">
+          <button id="notifBtn" class="w-10 h-10 rounded-xl card flex items-center justify-center text-lg" aria-label="Notifications">🔔</button>
+          <span id="notifBadge" class="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full text-[10px] font-bold text-white flex items-center justify-center" style="background:var(--danger)">3</span>
+          <div id="notifPanel" class="hidden absolute right-0 mt-2 w-80 card p-3 z-50 pop">
+            <p class="text-xs font-bold uppercase tracking-wider muted px-1 pb-2">Today's reminders</p>
+            <div id="notifList" class="space-y-2 max-h-72 overflow-auto"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 pt-5 pb-28 lg:pb-10">
+
+      <!-- ════ HOME ════ -->
+      <section id="page-home" class="page active">
+        <div class="card p-6 sm:p-7 relative overflow-hidden text-white" style="background:linear-gradient(135deg,#074236,#0E7C66 60%,#12907A)">
+          <svg class="absolute -right-6 -top-6 opacity-20" width="180" height="180" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="3 6"/></svg>
+          <div class="relative flex items-start justify-between gap-4">
+            <div>
+              <p class="text-white/70 text-sm" id="homeGreetTime">Good morning</p>
+              <h1 id="homeGreetName" class="font-display text-3xl sm:text-4xl font-bold mt-1">Biren! 🌤</h1>
+              <p id="homeGreetSub" class="text-white/80 text-sm mt-2 max-w-md">Small steps every day keep memories strong. You have <b id="homeTasksLeft">2</b> tasks and <b id="homeWaterLeft">6</b> glasses of water to go.</p>
+            </div>
+            <div class="text-5xl sm:text-6xl shrink-0 select-none" id="homeAvatarBig">👴</div>
+          </div>
+          <div class="relative mt-5 flex flex-wrap gap-2">
+            <button data-goto="games" class="px-4 py-2.5 rounded-xl bg-white text-[#0A5C4C] font-bold text-sm hover:-translate-y-0.5 transition">🎮 <span data-i18n="play_today">Train your brain</span></button>
+            <button data-goto="diary" class="px-4 py-2.5 rounded-xl bg-white/15 border border-white/25 font-bold text-sm text-white hover:bg-white/25 transition">🎙 Record a memory</button>
+            <button id="homeSpeak" class="px-4 py-2.5 rounded-xl bg-white/15 border border-white/25 font-bold text-sm text-white hover:bg-white/25 transition">🔊 Read to me</button>
+          </div>
+        </div>
+
+        <!-- quote -->
+        <div class="mt-5 card p-4 flex items-center gap-3">
+          <span class="text-2xl">🍃</span><p id="quoteBox" class="proverb italic text-sm muted flex-1">Old memories are like Assam tea — they only grow richer with time.</p>
+        </div>
+
+        <div class="mt-5 grid md:grid-cols-5 gap-5">
+          <!-- Tasks -->
+          <div class="card p-5 md:col-span-3">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-display font-bold text-lg ink" data-i18n="today_tasks">Today's tasks</h3>
+              <span id="taskProg" class="chip px-3 py-1 text-xs bg-[#EDF6F2]" style="border-color:#CFE6DD;color:#0A5C4C">0 / 4 done</span>
+            </div>
+            <div id="tasksList" class="space-y-2.5"></div>
+            <div class="mt-4 pt-3 border-t flex items-center justify-between" style="border-color:var(--line)">
+              <p class="text-xs muted">💊 Next medicine: <b id="nextMed" class="ink">Memantine · 9:00 PM</b></p>
+              <button data-goto="games" class="text-xs font-bold" style="color:var(--brand)">Earn a star →</button>
+            </div>
+          </div>
+          <!-- Hydration -->
+          <div class="card p-5 md:col-span-2 flex flex-col items-center">
+            <h3 class="font-display font-bold text-lg ink self-start" data-i18n="hydration">Hydration</h3>
+            <div class="relative my-3">
+              <svg width="132" height="132" viewBox="0 0 132 132">
+                <circle cx="66" cy="66" r="56" fill="none" stroke="#ECE3D6" stroke-width="12"/>
+                <circle id="hydArc" cx="66" cy="66" r="56" fill="none" stroke="#3E7CB1" stroke-width="12" stroke-linecap="round" stroke-dasharray="351.8" stroke-dashoffset="351.8" transform="rotate(-90 66 66)" style="transition:stroke-dashoffset .7s cubic-bezier(.3,.8,.3,1)"/>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-3xl font-bold ink"><span id="hydCount">2</span>/8</span><span class="text-[11px] muted">glasses 💧</span></div>
+            </div>
+            <div id="hydBtns" class="grid grid-cols-4 gap-2"></div>
+            <button id="hydAdd" class="btn-p w-full py-2.5 mt-4 text-sm">+ Drink a glass</button>
+          </div>
+        </div>
+
+        <!-- Recommended games -->
+        <div class="mt-6">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-display font-bold text-xl ink" data-i18n="reco_games">Recommended for you today</h3>
+            <button data-goto="games" class="text-xs font-bold" style="color:var(--brand)">View all →</button>
+          </div>
+          <div id="recoGames" class="grid sm:grid-cols-2 gap-4"></div>
+        </div>
+
+        <!-- family note -->
+        <div class="mt-6 card p-5 flex flex-wrap items-center gap-4" style="background:linear-gradient(120deg,#FFF6E4,#FFFDF8)">
+          <div class="w-12 h-12 rounded-full bg-[#F3E7CE] flex items-center justify-center text-2xl">👩</div>
+          <div class="flex-1 min-w-[200px]"><p class="text-xs font-bold uppercase tracking-wider" style="color:#B57F1F">Message from Pooja (daughter)</p><p class="text-sm ink mt-0.5">"Baba, I saw your game scores — so proud of you! Drink your water and call me after evening walk 💛"</p></div>
+          <button id="callPooja" class="btn-g px-4 py-2.5 text-sm">📞 Call</button>
+        </div>
+      </section>
+
+      <!-- ════ GAMES ════ -->
+      <section id="page-games" class="page">
+        <div class="card p-5 sm:p-6 flex flex-wrap items-center gap-4" style="background:linear-gradient(120deg,#074236,#0E7C66)">
+          <div class="text-4xl">🧠</div>
+          <div class="flex-1 min-w-[220px] text-white">
+            <h2 class="font-display text-2xl font-bold" data-i18n="brain_gym">AI Games</h2>
+            <p class="text-white/75 text-sm mt-0.5">Games that adapt to you — the AI tunes difficulty after every round and tracks your memory, attention & speed.</p>
+          </div>
+          <button id="openAnalysis" class="px-4 py-3 rounded-xl bg-white text-[#0A5C4C] font-bold text-sm hover:-translate-y-0.5 transition">📊 Brain report</button>
+        </div>
+
+        <div id="recoStrip" class="mt-5 grid sm:grid-cols-2 gap-4"></div>
+
+        <h3 class="font-display font-bold text-xl ink mt-7 mb-3" data-i18n="all_games">All games</h3>
+        <div id="gameGrid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+        <div class="mt-4 card p-4 flex flex-col sm:flex-row sm:items-center gap-4" style="background:linear-gradient(135deg,#FFF8E7,#F4F0E7)">
+          <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shrink-0" style="background:#F2C063">🔑</div>
+          <div class="flex-1"><div class="flex items-center gap-2 flex-wrap"><p class="font-bold ink">Medha Focus Quest</p><span class="chip px-2 py-0.5 text-[10px] font-bold" style="color:#8A6210;border-color:#EBD6A8;background:#FFF3DC">NEW</span></div><p class="text-xs muted mt-1">Find Grandma’s keys, stay with the small task, and gently dismiss distractions.</p></div>
+          <button id="focusQuestBtn" class="btn-p px-4 py-2.5 text-sm whitespace-nowrap">🔑 Play Focus Quest</button>
+        </div>
+
+        <div class="mt-7 card p-5">
+          <div class="flex items-start gap-3">
+            <span class="text-2xl">💡</span>
+            <div><p class="font-bold ink text-sm">How the adaptive AI works</p>
+            <p class="text-sm muted mt-1 leading-relaxed">After every round we compute your accuracy & speed, update a moving average (EMA) per skill, and re-balance the difficulty level (Lv 1–5) — the same pattern used in our Supabase <code class="text-xs bg-[#F3EDE2] px-1.5 py-0.5 rounded">game_log</code> table. Recommendations always target your <b>weakest skill</b> first.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ DIARY ════ -->
+      <section id="page-diary" class="page">
+        <div class="card p-6 sm:p-8 text-center relative overflow-hidden" style="background:linear-gradient(135deg,#FFF6E4,#FFFDF8)">
+          <div class="absolute top-0 left-0 right-0 weave h-1.5"></div>
+          <h2 class="font-display text-2xl font-bold ink mt-2" data-i18n="voice_diary">Voice Diary</h2>
+          <p class="muted text-sm mt-1 max-w-md mx-auto">Speak freely about your day. MEDHA-AI listens, writes it down, and can translate it for family — <span data-i18n="in_your_lang">in your language</span>.</p>
+
+          <div class="mt-6 flex flex-wrap justify-center gap-3">
+            <select id="recLangSel" class="chip px-4 py-3 bg-white text-sm font-bold" aria-label="Recognition language">
+              <option value="en-IN">🗣 English</option><option value="hi-IN">🗣 हिन्दी</option>
+              <option value="bn-IN">🗣 বাংলা</option><option value="as-IN">🗣 অসমীয়া</option>
+            </select>
+            <select id="transLangSel" class="chip px-4 py-3 bg-white text-sm font-bold" aria-label="Translate to">
+              <option value="en">→ English</option><option value="hi">→ हिन्दी</option>
+              <option value="bn">→ বাংলা</option><option value="as">→ অসমীয়া</option>
+            </select>
+          </div>
+
+          <button id="micBig" class="mt-6 w-32 h-32 rounded-full btn-p text-5xl mx-auto flex items-center justify-center" aria-label="Start voice recording">🎙</button>
+          <p id="micHint" class="muted text-sm mt-4 font-semibold">Tap the mic and start speaking…</p>
+
+          <div class="mt-5 max-w-xl mx-auto text-left">
+            <textarea id="diaryText" rows="3" class="w-full px-4 py-3.5 rounded-xl border-2 bg-white text-base" style="border-color:var(--line)" placeholder="Your words will appear here — or type / tap a memory below…"></textarea>
+            <div id="phraseChips" class="flex flex-wrap gap-2 mt-2.5"></div>
+            <div id="transOut" class="hidden mt-3 p-4 rounded-xl bg-[#EDF6F2] border" style="border-color:#CFE6DD">
+              <p class="text-[10px] font-bold uppercase tracking-wider" style="color:#0A5C4C">✨ Gemini translation</p>
+              <p id="transText" class="text-sm ink mt-1"></p>
+            </div>
+            <div class="flex gap-3 mt-4">
+              <button id="translateBtn" class="chip flex-1 py-3 bg-white text-sm font-bold">🌐 Translate</button>
+              <button id="saveEntryBtn" class="btn-p flex-[1.4] py-3 text-sm">💾 Save to diary</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex items-center justify-between">
+          <h3 class="font-display font-bold text-xl ink">📚 Saved memories</h3>
+          <div class="flex gap-2">
+            <button id="syncBtn" class="chip px-3 py-2 text-xs font-bold bg-white" title="Sync queued entries to cloud">🔄 Sync <span id="syncCount" class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] text-white" style="background:var(--danger)">0</span></button>
+            <button id="playAllBtn" class="chip px-3 py-2 text-xs font-bold bg-white">▶︎ Play latest</button>
+          </div>
+        </div>
+        <div id="entriesList" class="mt-3 space-y-3"></div>
+      </section>
+
+      <!-- ════ BOOK ════ -->
+      <section id="page-book" class="page">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <div><h2 class="font-display text-2xl font-bold ink" data-i18n="memory_book">My Memory Book</h2>
+          <p class="muted text-sm">Tap the pages to turn · tap ✏️ to edit · saves instantly</p></div>
+          <div class="flex items-center gap-2">
+            <button id="bookPrev" class="w-12 h-12 rounded-xl card text-xl font-bold" aria-label="Previous page">‹</button>
+            <span id="bookPageNum" class="text-sm font-bold muted min-w-20 text-center">Cover</span>
+            <button id="bookNext" class="w-12 h-12 rounded-xl card text-xl font-bold" aria-label="Next page">›</button>
+          </div>
+        </div>
+        <div class="book-stage mx-auto relative" style="max-width:640px;height:min(66vh,540px)">
+          <div id="bookShadow" class="absolute inset-x-6 -bottom-3 h-8 rounded-[100%] blur-md" style="background:rgba(43,35,32,.18)"></div>
+          <div id="book" class="absolute inset-0"></div>
+        </div>
+        <p class="text-center text-xs muted mt-4">🪔 Pages woven with familiar things — tea gardens, Kaziranga, Bihu & family</p>
+      </section>
+
+      <!-- ════ GEO-FENCING ════ -->
+      <section id="page-geo" class="page">
+        <div id="geoBanner" class="hidden card p-4 mb-4 items-center gap-3 text-white" style="background:linear-gradient(120deg,#D65A3F,#C2452D)">
+          <span class="text-2xl">🚨</span><p class="text-sm font-bold flex-1">Outside safe zone! Geofencing has alerted the caregiver.</p>
+          <button id="geoImSafe" class="px-4 py-2 rounded-xl bg-white font-bold text-sm" style="color:#C2452D">I'm safe ✓</button>
+        </div>
+        <div class="grid lg:grid-cols-3 gap-5">
+          <div class="card p-4 lg:col-span-2">
+            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+              <div><h3 class="font-display font-bold text-lg ink">📍 Live geofencing map</h3><p class="text-xs muted mt-0.5">Real location · OpenStreetMap</p></div>
+              <div class="flex gap-2">
+                <button id="useRealLoc" class="chip px-3 py-2 text-xs font-bold bg-white">🛰 Start live location</button>
+                <button id="homeWalk" class="chip px-3 py-2 text-xs font-bold bg-white hidden">🏠 Center on me</button>
+              </div>
+            </div>
+            <div id="geoMap" class="w-full rounded-xl" style="height:430px;background:#F2EEE4;border:1.5px solid var(--line);z-index:1"></div>
+            <div class="mt-3 flex items-center gap-3 flex-wrap">
+              <label class="text-xs font-bold muted">Home radius</label>
+              <input id="radiusRange" type="range" min="30" max="500" value="55" class="flex-1 min-w-32"/>
+              <span id="radiusVal" class="text-xs font-bold ink">55 m</span>
+              <button id="addZoneBtn" class="chip px-3 py-1.5 text-xs font-bold bg-white">➕ Add place</button>
+            </div>
+            <div id="addZoneForm" class="hidden mt-3 flex gap-2 flex-wrap">
+              <input id="zoneNameInp" placeholder="Place name (e.g. Club)" class="chip px-3 py-2 bg-white text-sm flex-1 min-w-36"/>
+              <button id="zonePlaceBtn" class="btn-p px-4 py-2 text-xs">Tap map to place</button>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div class="card p-4">
+              <h3 class="font-display font-bold text-lg ink mb-3">🛡 Safe zones</h3>
+              <div id="zonesList" class="space-y-2.5"></div>
+            </div>
+            <div class="card p-4">
+              <h3 class="font-display font-bold text-lg ink mb-2">SOS mode</h3>
+              <p class="text-xs muted leading-relaxed">Live GPS checks whether Biren is inside a safe zone. If he leaves every zone, an SOS fires automatically and the caregiver is alerted.</p>
+              <p id="geoStatus" class="mt-3 text-xs font-bold" style="color:#0A5C4C">Location not started. Tap “Start live location” to allow GPS.</p>
+              <p id="geoCoords" class="mt-1 text-[11px] muted break-all">Coordinates will appear here after permission is granted.</p>
+              <button id="testSOS" class="mt-3 w-full py-3 rounded-xl font-bold text-sm text-white" style="background:linear-gradient(135deg,#D65A3F,#C2452D)">🚨 Test SOS</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ════ SETTINGS ════ -->
+      <section id="page-settings" class="page">
+        <h2 class="font-display text-2xl font-bold ink mb-4" data-i18n="settings">Settings</h2>
+        <div class="grid md:grid-cols-2 gap-5">
+          <div class="card p-5 space-y-5">
+            <div><p class="text-xs font-bold uppercase tracking-wider muted mb-2">🌐 Language / ভাষা</p>
+              <select id="setLang" class="w-full px-4 py-3 rounded-xl border-2 bg-white font-bold text-sm" style="border-color:var(--line)">
+                <option value="en">English</option><option value="as">অসমীয়া (Assamese)</option>
+                <option value="bn">বাংলা (Bengali)</option><option value="hi">हिन्दी (Hindi)</option>
+              </select></div>
+            <div><p class="text-xs font-bold uppercase tracking-wider muted mb-2">🔤 Text size</p>
+              <div class="grid grid-cols-3 gap-2" id="sizeBtns">
+                <button data-ts="sm" class="tsBtn chip py-3 bg-white text-sm">A · Small</button>
+                <button data-ts="md" class="tsBtn chip py-3 bg-white text-base">A · Medium</button>
+                <button data-ts="lg" class="tsBtn chip py-3 bg-white text-lg">A · Large</button>
+              </div></div>
+            <div class="flex items-center justify-between"><div><p class="font-bold text-sm ink">🔊 Voice assistance</p><p class="text-xs muted">Reads greetings & instructions aloud</p></div>
+              <input id="setVoice" type="checkbox" checked class="w-6 h-6 accent-[#0E7C66]"/></div>
+            <div><div class="flex justify-between mb-1"><p class="font-bold text-sm ink">🗣 Speech speed</p><span id="rateVal" class="text-xs font-bold muted">0.9×</span></div>
+              <input id="setRate" type="range" min="0.6" max="1.3" step="0.1" value="0.9" class="w-full"/></div>
+          </div>
+          <div class="card p-5 space-y-5">
+            <div class="flex items-center justify-between"><div><p class="font-bold text-sm ink">💊 Medicine reminders</p><p class="text-xs muted">Bell + voice nudges</p></div><input id="setNMed" type="checkbox" checked class="w-6 h-6 accent-[#0E7C66]"/></div>
+            <div class="flex items-center justify-between"><div><p class="font-bold text-sm ink">💧 Hydration nudges</p></div><input id="setNHyd" type="checkbox" checked class="w-6 h-6 accent-[#0E7C66]"/></div>
+            <div class="flex items-center justify-between"><div><p class="font-bold text-sm ink">🛡 Geo alerts</p><p class="text-xs muted">SOS to caregiver</p></div><input id="setNGeo" type="checkbox" checked class="w-6 h-6 accent-[#0E7C66]"/></div>
+            <div class="flex items-center justify-between"><div><p class="font-bold text-sm ink">🌗 High contrast</p><p class="text-xs muted">Easier on the eyes</p></div><input id="setContrast" type="checkbox" class="w-6 h-6 accent-[#0E7C66]"/></div>
+            <div class="pt-3 border-t space-y-2" style="border-color:var(--line)">
+              <button id="testNotifBtn" class="chip w-full py-3 bg-white text-sm font-bold">🔔 Test a reminder</button>
+              <button id="docsBtn" class="btn-p w-full py-3 text-sm">📋 Project README & database docs</button>
+              <button id="resetBtn" class="w-full py-3 rounded-xl text-sm font-bold" style="color:var(--danger);border:1.5px solid var(--danger)">🗑 Reset demo data</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom nav (mobile) -->
+    <nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 glass border-t px-2 pb-[env(safe-area-inset-bottom)]" style="border-color:var(--line)">
+      <div id="botNav" class="max-w-lg mx-auto grid grid-cols-6 gap-0.5 py-1.5">
+        <button data-page="home" class="nav-item active text-[10px] font-bold">🏠<span data-i18n="nav_home">Home</span></button>
+        <button data-page="games" class="nav-item text-[10px] font-bold">🎮<span data-i18n="nav_games">Games</span></button>
+        <button data-page="diary" class="nav-item text-[10px] font-bold">🎙<span data-i18n="nav_diary">Diary</span></button>
+        <button data-page="book" class="nav-item text-[10px] font-bold">📖<span data-i18n="nav_book">Book</span></button>
+        <button data-page="geo" class="nav-item text-[10px] font-bold">🛡<span data-i18n="nav_guard">Guard</span></button>
+        <button data-page="settings" class="nav-item text-[10px] font-bold">⚙️<span data-i18n="nav_settings">More</span></button>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<!-- ════════════════ CAREGIVER APP ════════════════ -->

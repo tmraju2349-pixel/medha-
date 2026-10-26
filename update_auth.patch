@@ -1,0 +1,23 @@
+--- src/context/MedhaContext.tsx
++++ src/context/MedhaContext.tsx
+@@ -160,9 +160,19 @@
+ 
+     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+       if (session?.user) {
+         const role = session.user.user_metadata?.role || 'patient';
+         setCurrentUser(role as 'patient' | 'caregiver');
++
++        // Ensure user is stored locally for offline fallback and display
++        const email = session.user.email || '';
++        const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || email.split('@')[0] || 'User';
++        setDb((prev) => {
++          const next = { ...prev };
++          if (!next.users.find(u => u.username === email)) {
++            next.users = [...next.users, { username: email, password: '', role: role as 'patient' | 'caregiver', name, phone: '' }];
++            saveDB(next);
++          }
++          return next;
++        });
+         syncManager.triggerSync();
+       } else {
+         setCurrentUser(null);

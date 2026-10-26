@@ -1,0 +1,12 @@
+{
+  "name": "mega ultimate",
+  "description": "Clinical-grade cognitive care assistant with dynamic patient identity, real caregiver pairing, battery-aware geofencing, and multilingual voice assistant.",
+  "requestFramePermissions": [
+    "geolocation",
+    "microphone",
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

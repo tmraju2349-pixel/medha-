@@ -1,0 +1,76 @@
+<div id="careApp" class="hidden min-h-screen">
+  <header class="sticky top-0 z-30 glass border-b" style="border-color:var(--line)">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg text-white" style="background:linear-gradient(135deg,#0E7C66,#0A5C4C)">🧠</div>
+      <div class="flex-1 min-w-0"><p class="font-display font-bold ink leading-tight">Caregiver Dashboard</p><p class="text-xs muted truncate">Monitoring <b>Biren Saikia</b> · Guwahati, Assam</p></div>
+      <span class="chip px-3 py-1.5 text-xs font-bold bg-white hidden sm:inline">🟢 Live local sync</span>
+      <button id="logoutBtn2" class="chip px-4 py-2 text-xs font-bold bg-white" style="color:var(--danger)">Sign out</button>
+    </div>
+  </header>
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <!-- stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="careStats"></div>
+    <!-- live geofencing patrol -->
+    <div class="card p-5">
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <div><h3 class="font-display font-bold text-lg ink">📍 Live geofencing patrol</h3><p class="text-xs muted mt-0.5">Real GPS data shared from Biren’s device</p></div>
+        <span id="cgLocationStatus" class="chip px-3 py-1.5 text-xs font-bold bg-white">Waiting for GPS</span>
+      </div>
+      <div class="grid lg:grid-cols-3 gap-4 items-stretch">
+        <div id="careMap" class="lg:col-span-2 rounded-xl" style="height:360px;background:#F2EEE4;border:1.5px solid var(--line)"></div>
+        <div class="space-y-3">
+          <div class="p-3 rounded-xl" style="background:#EDF6F2"><p class="text-[10px] font-bold uppercase tracking-wider muted">Current coordinates</p><p id="cgLocationCoords" class="text-sm font-bold ink mt-1 break-all">No live location received</p></div>
+          <div class="p-3 rounded-xl" style="background:#FFF3DC"><p class="text-[10px] font-bold uppercase tracking-wider muted">Last GPS update</p><p id="cgLocationTime" class="text-sm font-bold ink mt-1">Not available</p></div>
+          <div class="p-3 rounded-xl" style="background:#FBEAE5"><p class="text-[10px] font-bold uppercase tracking-wider muted">Patrol status</p><p id="cgPatrolStatus" class="text-sm font-bold ink mt-1">No location check yet</p></div>
+          <button id="cgCenterLocation" class="btn-p w-full py-3 text-sm">🎯 Center on patient</button>
+        </div>
+      </div>
+    </div>
+    <!-- charts -->
+    <div class="grid lg:grid-cols-3 gap-5">
+      <div class="card p-5 lg:col-span-2">
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2"><h3 class="font-display font-bold text-lg ink">📈 Cognitive index — 14 days</h3><span id="careTrend" class="chip px-3 py-1 text-xs font-bold bg-[#EDF6F2]" style="border-color:#CFE6DD;color:#0A5C4C"></span></div>
+        <div class="h-56"><canvas id="chLine"></canvas></div>
+      </div>
+      <div class="card p-5">
+        <h3 class="font-display font-bold text-lg ink mb-3">🎯 Skill balance</h3>
+        <div class="h-56"><canvas id="chRadar"></canvas></div>
+      </div>
+    </div>
+    <div class="grid lg:grid-cols-3 gap-5">
+      <div class="card p-5">
+        <h3 class="font-display font-bold text-lg ink mb-3">🧩 Game performance</h3>
+        <div class="h-52"><canvas id="chBars"></canvas></div>
+        <p class="text-xs muted mt-3">Adaptive levels auto-tune after every round — Lv shown as bars.</p>
+      </div>
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-3"><h3 class="font-display font-bold text-lg ink">🔔 Alerts</h3><span id="alertCount" class="chip px-2.5 py-1 text-xs font-bold" style="background:#FBEAE5;color:#C2452D;border-color:#F0CFC6">0</span></div>
+        <div id="cgAlerts" class="space-y-2.5 max-h-52 overflow-auto pr-1"></div>
+      </div>
+      <div class="card p-5">
+        <h3 class="font-display font-bold text-lg ink mb-3">✅ Today's routine</h3>
+        <div class="h-40 flex items-center justify-center"><canvas id="chDough"></canvas></div>
+        <div id="cgTasksMini" class="mt-3 space-y-1.5"></div>
+      </div>
+    </div>
+    <!-- management -->
+    <div class="grid lg:grid-cols-2 gap-5">
+      <div class="card p-5">
+        <h3 class="font-display font-bold text-lg ink mb-3">📝 Task reminders</h3>
+        <div class="flex gap-2 mb-3"><input id="cgTaskInp" placeholder="New task for Biren…" class="chip flex-1 px-3 py-2.5 bg-white text-sm"/><input id="cgTaskTime" type="time" value="17:00" class="chip px-3 py-2.5 bg-white text-sm"/><button id="cgTaskAdd" class="btn-p px-4 py-2.5 text-sm">Add</button></div>
+        <div id="cgTasks" class="space-y-2 max-h-56 overflow-auto pr-1"></div>
+        <div class="mt-4 pt-3 border-t" style="border-color:var(--line)"><p class="text-xs font-bold uppercase tracking-wider muted mb-2">💊 Medication schedule</p><div id="cgMeds" class="space-y-2"></div></div>
+      </div>
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-3"><h3 class="font-display font-bold text-lg ink">🎙 Voice diary management</h3><button id="cgExport" class="chip px-3 py-1.5 text-xs font-bold bg-white">⬇ Export .txt</button></div>
+        <div id="cgDiary" class="space-y-2.5 max-h-72 overflow-auto pr-1"></div>
+        <div class="mt-4 pt-3 border-t flex items-center gap-3" style="border-color:var(--line)">
+          <div class="flex-1"><p class="font-bold text-sm ink">🛡 Geo-fencing</p><p id="cgZoneSum" class="text-xs muted"></p></div>
+          <button id="cgSOSTest" class="px-4 py-2.5 rounded-xl text-white text-xs font-bold" style="background:linear-gradient(135deg,#D65A3F,#C2452D)">Simulate SOS</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ══════ GAME OVERLAYS ══════ -->

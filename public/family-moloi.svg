@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="bg-moloi" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="60" fill="url(#bg-moloi)"/>
+  <!-- Head & Torso -->
+  <circle cx="60" cy="46" r="22" fill="#fde68a" />
+  <!-- Hair (elder/dad) -->
+  <path d="M38 42 C40 26, 80 26, 82 42 C76 34, 44 34, 38 42 Z" fill="#475569" />
+  <!-- Glasses -->
+  <circle cx="51" cy="47" r="6" fill="none" stroke="#1e293b" stroke-width="2" />
+  <circle cx="69" cy="47" r="6" fill="none" stroke="#1e293b" stroke-width="2" />
+  <line x1="57" y1="47" x2="63" y2="47" stroke="#1e293b" stroke-width="2" />
+  <!-- Smile -->
+  <path d="M53 58 Q60 64 67 58" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" />
+  <!-- Clothes -->
+  <path d="M28 106 C30 80, 48 74, 60 74 C72 74, 90 80, 92 106 Z" fill="#0284c7" />
+  <!-- Collar -->
+  <polygon points="60,82 52,74 68,74" fill="#ffffff" />
+</svg>

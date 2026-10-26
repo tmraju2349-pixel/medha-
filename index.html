@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      // Suppress benign [vite] websocket connection logs in Cloud Run / containerized preview
+      (function() {
+        function shouldFilter(args) {
+          try {
+            for (var i = 0; i < args.length; i++) {
+              var a = args[i];
+              var str = String((a && a.message) ? a.message : (a || ''));
+              if (
+                str.indexOf('[vite]') !== -1 ||
+                str.indexOf('failed to connect to websocket') !== -1 ||
+                str.indexOf('WebSocket connection to') !== -1 ||
+                str.indexOf('server connection lost. Polling for restart') !== -1
+              ) {
+                return true;
+              }
+            }
+          } catch(e) {}
+          return false;
+        }
+        var _origErr = console.error;
+        console.error = function() {
+          if (shouldFilter(arguments)) return;
+          _origErr.apply(console, arguments);
+        };
+        var _origWarn = console.warn;
+        console.warn = function() {
+          if (shouldFilter(arguments)) return;
+          _origWarn.apply(console, arguments);
+        };
+        var _origInfo = console.info;
+        console.info = function() {
+          if (shouldFilter(arguments)) return;
+          _origInfo.apply(console, arguments);
+        };
+        window.addEventListener('error', function(e) {
+          if (e && e.message && shouldFilter([e.message])) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+          }
+        }, true);
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <meta name="theme-color" content="#F9F6F0" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Medha" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <title>MEDHA - Cognitive Care Companion</title>
+    <meta name="description" content="Clinical-grade cognitive care assistant with dynamic patient identity, real caregiver pairing, battery-aware geofencing, and multilingual voice assistant." />
+    <meta property="og:title" content="MEDHA - Cognitive Care Companion" />
+    <meta property="og:description" content="Clinical-grade cognitive care assistant with dynamic patient identity, real caregiver pairing, battery-aware geofencing, and multilingual voice assistant." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;1,600&family=Nunito:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600&family=Noto+Sans+Bengali:wght@400;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

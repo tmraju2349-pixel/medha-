@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#F8FAFC" />
+    </linearGradient>
+
+    <!-- Left Tech Brain Gradients -->
+    <linearGradient id="iconTechBlueTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="50%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#0369A1" />
+    </linearGradient>
+    <linearGradient id="iconTechBlueMid" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00C2FF" />
+      <stop offset="45%" stop-color="#0077E6" />
+      <stop offset="100%" stop-color="#003E9E" />
+    </linearGradient>
+    <linearGradient id="iconTechBlueDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284C7" />
+      <stop offset="60%" stop-color="#034694" />
+      <stop offset="100%" stop-color="#082F49" />
+    </linearGradient>
+    <linearGradient id="iconTechBlueDeep" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0369A1" />
+      <stop offset="100%" stop-color="#05192D" />
+    </linearGradient>
+
+    <!-- Right Organic Brain Warm Gradients -->
+    <linearGradient id="iconWarmRibbon1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFC107" />
+      <stop offset="45%" stop-color="#FF6B00" />
+      <stop offset="100%" stop-color="#FF3366" />
+    </linearGradient>
+    <linearGradient id="iconWarmRibbon2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF8A00" />
+      <stop offset="55%" stop-color="#E52E71" />
+      <stop offset="100%" stop-color="#9C27B0" />
+    </linearGradient>
+    <linearGradient id="iconWarmRibbon3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF4D4D" />
+      <stop offset="55%" stop-color="#C2185B" />
+      <stop offset="100%" stop-color="#7B1FA2" />
+    </linearGradient>
+    <linearGradient id="iconWarmRibbon4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#BA68C8" />
+      <stop offset="65%" stop-color="#6A1B9A" />
+      <stop offset="100%" stop-color="#3B0764" />
+    </linearGradient>
+
+    <!-- Shadow filter for 3D depth -->
+    <filter id="iconDepthShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#001845" flood-opacity="0.18" />
+    </filter>
+    <filter id="iconCircuitGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background rounded card -->
+  <rect width="512" height="512" rx="116" fill="url(#bgGrad)"/>
+  <rect width="512" height="512" rx="116" fill="none" stroke="#E2E8F0" stroke-width="4"/>
+
+  <!-- Centered Dual-Hemisphere Brain -->
+  <g transform="translate(132, 50) scale(1.0)" filter="url(#iconDepthShadow)">
+    <!-- Shadow under base -->
+    <ellipse cx="152" cy="425" rx="110" ry="14" fill="#001845" opacity="0.15" />
+
+    <!-- LEFT HEMISPHERE: TECH / CIRCUITS -->
+    <g id="left-hemisphere-sq">
+      <!-- Fold 1 (Top) -->
+      <path d="M 152 42 C 118 42 96 58 84 84 C 76 100 86 120 106 120 C 130 120 144 120 152 120 Z"
+            fill="url(#iconTechBlueTop)" />
+      <path d="M 152 42 C 124 42 100 56 90 78 C 106 72 128 70 152 72 Z"
+            fill="#7DD3FC" opacity="0.45" />
+
+      <!-- Fold 2 (Upper-Mid) -->
+      <path d="M 152 120 C 90 120 62 136 54 162 C 46 188 62 208 88 208 C 118 208 140 208 152 208 Z"
+            fill="url(#iconTechBlueMid)" />
+
+      <!-- Fold 3 (Mid lobe) -->
+      <path d="M 152 208 C 76 208 46 224 42 250 C 38 276 56 294 92 294 C 122 294 142 294 152 294 Z"
+            fill="url(#iconTechBlueDark)" />
+
+      <!-- Fold 4 (Lower lobe) -->
+      <path d="M 152 294 C 86 294 62 308 62 328 C 62 348 82 360 110 360 C 134 360 146 358 152 356 Z"
+            fill="url(#iconTechBlueDeep)" />
+
+      <!-- Circuit Traces & Glowing Nodes -->
+      <g id="circuits-sq" stroke="#FFFFFF" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#iconCircuitGlow)">
+        <!-- Trace 1 -->
+        <path d="M 148 82 L 116 82" />
+        <circle cx="112" cy="82" r="4.8" fill="#FFFFFF" />
+
+        <!-- Trace 2 -->
+        <path d="M 148 130 L 102 130 L 86 146 L 72 146" />
+        <circle cx="68" cy="146" r="4.8" fill="#FFFFFF" />
+
+        <!-- Trace 3 -->
+        <path d="M 148 178 L 90 178" />
+        <circle cx="86" cy="178" r="5.6" fill="#FFFFFF" />
+
+        <!-- Trace 4 -->
+        <path d="M 148 226 L 110 226 L 96 242 L 68 242" />
+        <circle cx="64" cy="242" r="4.8" fill="#FFFFFF" />
+
+        <!-- Trace 5 -->
+        <path d="M 148 272 L 104 272" />
+        <circle cx="100" cy="272" r="4.8" fill="#FFFFFF" />
+
+        <!-- Vertical interconnection bus -->
+        <path d="M 136 82 L 136 272" stroke-width="3" stroke-dasharray="8 6" opacity="0.8" />
+        <circle cx="136" cy="130" r="3.4" fill="#FFFFFF" />
+        <circle cx="136" cy="178" r="3.4" fill="#FFFFFF" />
+        <circle cx="136" cy="226" r="3.4" fill="#FFFFFF" />
+      </g>
+    </g>
+
+    <!-- RIGHT HEMISPHERE: WARM ORGANIC FLOWING RIBBONS -->
+    <g id="right-hemisphere-sq">
+      <!-- Ribbon 1 (Top swirl - Golden Yellow to Orange to Coral) -->
+      <path d="M 162 44 C 174 42 202 46 230 66 C 262 88 272 118 260 144 C 250 162 226 176 200 176 C 176 176 164 168 162 166 C 174 140 200 122 220 108 C 206 86 182 66 162 44 Z"
+            fill="url(#iconWarmRibbon1)" />
+
+      <!-- Ribbon 2 (Upper-Mid swirl - Orange to Crimson to Purple) -->
+      <path d="M 162 152 C 180 156 216 162 246 184 C 276 206 280 236 266 262 C 252 284 224 294 198 294 C 174 294 164 284 162 280 C 176 254 206 240 228 224 C 214 198 186 176 162 152 Z"
+            fill="url(#iconWarmRibbon2)" />
+
+      <!-- Ribbon 3 (Lower-Mid swirl - Coral to Ruby to Violet) -->
+      <path d="M 162 254 C 178 258 208 266 234 288 C 260 310 258 338 238 360 C 222 376 198 380 178 380 C 166 380 162 374 162 370 C 172 348 198 334 214 318 C 200 296 176 278 162 254 Z"
+            fill="url(#iconWarmRibbon3)" />
+
+      <!-- Ribbon 4 (Bottom tail - Lavender to Deep Plum) -->
+      <path d="M 162 352 C 170 354 184 362 192 376 C 200 394 190 410 178 422 C 170 430 164 432 162 432 C 160 420 162 386 162 352 Z"
+            fill="url(#iconWarmRibbon4)" />
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,66 @@
+<div id="gameOverlay" class="hidden fixed inset-0 z-50 items-center justify-center p-2 sm:p-4" style="background:rgba(20,14,10,.55);backdrop-filter:blur(6px)">
+  <div class="card game-overlay-shell w-full max-w-6xl h-[96vh] p-4 sm:p-6 pop relative flex flex-col overflow-hidden">
+    <button id="gameClose" class="absolute right-4 top-4 z-10 w-9 h-9 rounded-full bg-[#F5EFE5] font-bold shadow-sm" aria-label="Close">✕</button>
+    <div id="gameBody" class="flex-1 min-h-0 overflow-auto pr-1"></div>
+  </div>
+</div>
+
+<!-- Result modal -->
+<div id="resultModal" class="hidden fixed inset-0 z-[55] items-center justify-center p-4" style="background:rgba(20,14,10,.55);backdrop-filter:blur(6px)">
+  <div class="card w-full max-w-sm p-6 text-center pop">
+    <div id="resEmoji" class="text-5xl">🌟</div>
+    <h3 id="resTitle" class="font-display text-2xl font-bold ink mt-2">Wonderful!</h3>
+    <div id="resStars" class="text-3xl mt-1">⭐⭐⭐</div>
+    <div id="resStats" class="mt-3 text-sm muted space-y-1"></div>
+    <div class="mt-4 p-3 rounded-xl bg-[#EDF6F2] text-xs font-semibold" style="color:#0A5C4C">📊 Round logged · AI is re-tuning your difficulty…</div>
+    <div class="flex gap-3 mt-5"><button id="resAgain" class="chip flex-1 py-3 bg-white font-bold text-sm">↻ Play again</button><button id="resDone" class="btn-p flex-1 py-3 text-sm">Done</button></div>
+  </div>
+</div>
+
+<!-- SOS modal -->
+<div id="sosModal" class="hidden fixed inset-0 z-[70] items-center justify-center p-4" style="background:rgba(120,20,5,.6);backdrop-filter:blur(6px)">
+  <div class="card w-full max-w-sm p-6 text-center pop sos-pulse" style="background:linear-gradient(150deg,#D65A3F,#C2452D);border:none">
+    <div class="text-6xl">🚨</div>
+    <h3 class="font-display text-2xl font-bold text-white mt-2">SOS Active</h3>
+    <p class="text-white/90 text-sm mt-1">Biren is outside all safe zones. Guardian Pooja has been alerted with live location.</p>
+    <div class="mt-5 space-y-2.5">
+      <a href="tel:+919876543210" class="block w-full py-3.5 rounded-xl bg-white font-extrabold" style="color:#C2452D">📞 Call caregiver now</a>
+      <a href="tel:108" class="block w-full py-3.5 rounded-xl bg-black/25 text-white font-extrabold border border-white/30">🚑 Emergency 108</a>
+      <button id="sosSafe" class="w-full py-3 rounded-xl bg-white/20 text-white font-bold text-sm border border-white/30">✓ I'm safe — dismiss</button>
+    </div>
+  </div>
+</div>
+
+<!-- Analysis modal -->
+<div id="analysisModal" class="hidden fixed inset-0 z-50 items-center justify-center p-4" style="background:rgba(20,14,10,.55);backdrop-filter:blur(6px)">
+  <div class="card w-full max-w-lg p-6 pop max-h-[92vh] overflow-auto">
+    <div class="flex items-center justify-between"><h3 class="font-display text-xl font-bold ink">📊 Brain Report</h3><button id="analysisClose" class="w-9 h-9 rounded-full bg-[#F5EFE5] font-bold">✕</button></div>
+    <div id="riskCard" class="mt-4 p-4 rounded-xl"></div>
+    <div class="mt-4 grid grid-cols-5 gap-2 text-center" id="domainBars"></div>
+    <div class="mt-4 h-52"><canvas id="radarCh"></canvas></div>
+    <div class="mt-4 p-3.5 rounded-xl bg-[#FFF6E4] text-xs leading-relaxed" style="color:#7A5A14"><b>⚠️ Disclaimer:</b> demo analytics for engagement tracking only — not a medical diagnosis. Consult a clinician for assessment (e.g., MoCA / MMSE).</div>
+  </div>
+</div>
+
+<!-- Docs modal -->
+<div id="docsModal" class="hidden fixed inset-0 z-50 items-center justify-center p-4" style="background:rgba(20,14,10,.55);backdrop-filter:blur(6px)">
+  <div class="card w-full max-w-2xl p-6 pop max-h-[90vh] overflow-auto">
+    <div class="flex items-center justify-between sticky top-0 bg-white pb-3"><h3 class="font-display text-xl font-bold ink">📋 README — Setup & progress</h3><button id="docsClose" class="w-9 h-9 rounded-full bg-[#F5EFE5] font-bold">✕</button></div>
+    <div class="text-sm muted leading-relaxed space-y-4">
+      <div><p class="font-bold ink">Stack</p><p>Single-file HTML/JS + Tailwind + Chart.js · Web Speech API · MediaRecorder · Geolocation · localStorage Supabase-mock (sync-ready).</p></div>
+      <div><p class="font-bold ink">Supabase schema</p><pre class="bg-[#F5EFE5] rounded-xl p-3 text-[11px] overflow-auto">users(id,role,username,password,name,phone);
+tasks(id,patient_id,title,time,done,icon);
+meds(id,patient_id,name,time,taken);
+diary(id,patient_id,ts,text,translated,lang,audio,synced);
+scores(day,memory,attention,speed);
+game_log(id,game,score,acc,dur,ts);
+zones(id,name,x,y,r); alerts(id,type,msg,ts,status);</pre></div>
+      <div><p class="font-bold ink">Progress log</p><ul class="list-disc pl-5"><li>Day 1 ✔ Auth shell, design system, routing, seed DB layer</li><li>Day 2 ✔ Home, hydration ring, tasks, notifications</li><li>Day 3 ✔ 4 adaptive games + EMA analytics + risk report</li><li>Day 4 ✔ Voice diary: STT / TTS / audio recording / translation</li><li>Day 5 ✔ Memory Book 3D flips, geo-fence map, SOS pipeline</li><li>Day 6 ✔ Caregiver dashboards, offline sync, README</li></ul></div>
+      <p class="text-xs">Demo accounts: <b>patient/1234</b> · <b>caregiver/1234</b></p>
+    </div>
+  </div>
+</div>
+
+<div id="toasts" class="fixed top-4 left-1/2 -translate-x-1/2 z-[90] space-y-2 w-[92%] max-w-sm"></div>
+
+
