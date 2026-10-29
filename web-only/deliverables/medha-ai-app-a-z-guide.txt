@@ -219,7 +219,7 @@ The current greeting uses the active local patient profile.
 
 I - INSTALLATION
 ----------------
-For development in the Replit workspace:
+For development in the development workspace:
 
 1. Install dependencies:
 
@@ -417,7 +417,7 @@ S - SECURITY AND PRIVACY
 Important security rules:
 
 - Never place GEMINI_API_KEY inside the mobile application.
-- The Gemini key belongs on the API server as a Replit secret.
+- The Gemini key belongs on the API server as a server environment secret.
 - Never paste API keys or credentials into source code.
 - Do not use the fake test profile as real medical data.
 - Do not publish the sample caregiver phone number as a real contact.

@@ -1,6 +1,3 @@
-import { ReplitConnectors } from "@replit/connectors-sdk";
-
-const CONNECTOR_NAME = "supabase";
 const PROFILES_TABLE = "/rest/v1/profiles?select=id&limit=1";
 
 export interface SupabaseRequestOptions {
@@ -31,18 +28,37 @@ function parseResponseBody(text: string): unknown {
   }
 }
 
+function supabaseConfig() {
+  const url = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY ?? process.env.VITE_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    throw new Error(
+      "Supabase configuration is missing. Set SUPABASE_URL and SUPABASE_ANON_KEY.",
+    );
+  }
+  return { url: url.replace(/\/$/, ""), key };
+}
+
+function requestHeaders(key: string, extra: Record<string, string> = {}) {
+  return {
+    Accept: "application/json",
+    apikey: key,
+    ...extra,
+  };
+}
+
 export async function supabaseRequest<T>(
   path: string,
   options: SupabaseRequestOptions = {},
 ): Promise<T> {
-  const connectors = new ReplitConnectors();
-  const response = await connectors.proxy(CONNECTOR_NAME, path, {
+  const { url, key } = supabaseConfig();
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const response = await fetch(`${url}${normalizedPath}`, {
     method: options.method ?? "GET",
-    headers: {
-      Accept: "application/json",
+    headers: requestHeaders(key, {
       ...(options.body === undefined ? {} : { "Content-Type": "application/json" }),
       ...options.headers,
-    },
+    }),
     ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
   });
 
@@ -55,26 +71,13 @@ export async function supabaseRequest<T>(
 }
 
 export async function supabaseRawRequest(path: string): Promise<Response> {
-  const connectors = new ReplitConnectors();
+  const { url, key } = supabaseConfig();
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const url = `${connectors.getProxyUrl()}${normalizedPath}`;
-  const headers = await connectors.getProxyHeaders(CONNECTOR_NAME);
-  const response = await fetch(url, {
+  return fetch(`${url}${normalizedPath}`, {
     method: "GET",
     redirect: "manual",
-    headers: { ...headers, Accept: "application/json" },
+    headers: requestHeaders(key),
   });
-
-  if (response.status === 401) {
-    const refreshedHeaders = await connectors.getProxyHeaders(CONNECTOR_NAME);
-    return fetch(url, {
-      method: "GET",
-      redirect: "manual",
-      headers: { ...refreshedHeaders, Accept: "application/json" },
-    });
-  }
-
-  return response;
 }
 
 export async function getSupabaseStatus() {
@@ -98,7 +101,7 @@ export async function getSupabaseStatus() {
     return {
       connected: false,
       schemaReady: false,
-      message: "Supabase could not be reached through the connected connector.",
+      message: "Supabase could not be reached with the configured environment.",
     };
   }
 }
