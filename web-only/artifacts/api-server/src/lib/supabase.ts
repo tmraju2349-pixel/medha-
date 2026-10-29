@@ -1,3 +1,4 @@
+import { ReplitConnectors } from "@replit/connectors-sdk";
 
 const CONNECTOR_NAME = "supabase";
 const PROFILES_TABLE = "/rest/v1/profiles?select=id&limit=1";
@@ -30,40 +31,52 @@ function parseResponseBody(text: string): unknown {
   }
 }
 
-function supabaseConfig() {
-  const url = (process.env.SUPABASE_URL ?? "").replace(/\/$/, "");
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? "";
-  if (!url || !key) throw new Error("Supabase is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
-  return { url, key };
-}
-
-async function request(path: string, options: SupabaseRequestOptions = {}): Promise<Response> {
-  const { url, key } = supabaseConfig();
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return fetch(`${url}${normalizedPath}`, {
+export async function supabaseRequest<T>(
+  path: string,
+  options: SupabaseRequestOptions = {},
+): Promise<T> {
+  const connectors = new ReplitConnectors();
+  const response = await connectors.proxy(CONNECTOR_NAME, path, {
     method: options.method ?? "GET",
     headers: {
       Accept: "application/json",
-      apikey: key,
       ...(options.body === undefined ? {} : { "Content-Type": "application/json" }),
-      ...(options.body === undefined ? {} : { Prefer: "return=minimal" }),
-      Authorization: options.headers?.Authorization ?? `Bearer ${key}`,
       ...options.headers,
     },
     ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
   });
-}
 
-export async function supabaseRequest<T>(path: string, options: SupabaseRequestOptions = {}): Promise<T> {
-  const response = await request(path, options);
   const body = parseResponseBody(await response.text());
-  if (!response.ok) throw new SupabaseRequestError(response.status, body);
+  if (!response.ok) {
+    throw new SupabaseRequestError(response.status, body);
+  }
+
   return body as T;
 }
 
 export async function supabaseRawRequest(path: string): Promise<Response> {
-  return request(path);
+  const connectors = new ReplitConnectors();
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const url = `${connectors.getProxyUrl()}${normalizedPath}`;
+  const headers = await connectors.getProxyHeaders(CONNECTOR_NAME);
+  const response = await fetch(url, {
+    method: "GET",
+    redirect: "manual",
+    headers: { ...headers, Accept: "application/json" },
+  });
+
+  if (response.status === 401) {
+    const refreshedHeaders = await connectors.getProxyHeaders(CONNECTOR_NAME);
+    return fetch(url, {
+      method: "GET",
+      redirect: "manual",
+      headers: { ...refreshedHeaders, Accept: "application/json" },
+    });
+  }
+
+  return response;
 }
+
 export async function getSupabaseStatus() {
   try {
     await supabaseRequest<unknown[]>(PROFILES_TABLE);

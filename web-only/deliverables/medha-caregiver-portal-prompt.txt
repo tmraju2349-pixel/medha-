@@ -1,0 +1,415 @@
+MEDHA CAREGIVER PORTAL — PERSONALIZED WEBSITE BUILD PROMPT
+Updated for the current Medha AI mobile app, Express API, Supabase backend, and separate live/demo login flows.
+
+Copy everything between START PROMPT and END PROMPT into the website-building agent.
+
+============================= START PROMPT =============================
+
+Build a responsive web application called “Medha Caregiver Portal” as a NEW, SEPARATE WEB ARTIFACT alongside the existing Medha AI Expo mobile app.
+
+Do not replace, re-platform, or break the mobile artifact. Reuse its Medha branding and connect to the existing Express API and Supabase architecture. Do not build a static-only mockup: deliver a functional portal with real authenticated API requests, clear loading/error/empty states, and a safe development demo mode.
+
+## Product context
+
+Medha AI is an AI-powered cognitive care and memory assistance product for older adults living with dementia and their caregivers, with an initial focus on families in India’s North Eastern Region.
+
+The mobile app supports daily care routines, voice diary entries, memory cues, cognitive games, and patient safety. The caregiver portal is the family-facing workspace for reviewing and coordinating this care.
+
+Use the term “caregiver” in the interface. The user may casually say “caretaker,” but the product language is “caregiver.”
+
+## Current project architecture and integration facts
+
+The project already has:
+
+- An Expo mobile artifact at `artifacts/medha-ai`.
+- An Express API artifact at `artifacts/api-server`.
+- A server-side Supabase connector. Keep Supabase access and credentials on the server; never put a Supabase service-role key in browser code.
+- Supabase tables for profiles, patient profiles, caregiver-patient links, tasks, notifications, voice diary entries, game sessions, memory cues, safe zones, safety events, medical reports, and audit logs.
+- Real account authentication routes:
+  - `POST /api/auth/signup`
+  - `POST /api/auth/signin`
+  - `POST /api/auth/google/start`
+  - `POST /api/auth/refresh`
+  - `POST /api/auth/signout`
+  - `GET /api/auth/me`
+- Patient self-service routes:
+  - `GET /api/me/snapshot`
+  - `PUT /api/me/profile`
+  - `POST /api/me/sync`
+- The patient `/api/me/*` routes are self-scoped. They are not authorization for a caregiver to read another person’s data.
+- The mobile app has a distinct local demo flow. Demo data stays local and must never be treated as a real user account or uploaded to Supabase.
+- Google sign-in code and a start endpoint exist, but provider setup is still pending. Do not claim Google sign-in is ready until it has been configured and tested end-to-end.
+
+Before changing code, inspect the current artifact list, API routes, Supabase schema/migrations, authentication behavior, design tokens, and workflow setup. Reuse current conventions where possible. Confirm whether the caregiver-link schema and required policies are present before writing migrations. Database DDL may need to be applied manually in the Supabase SQL Editor.
+
+## Non-negotiable live/demo separation
+
+The live portal and local demo must be visibly and technically separate:
+
+- “Sign in to your account” must authenticate against the real Express/Supabase Auth API.
+- “Explore demo” must be an explicitly labeled, local-only preview with synthetic data.
+- Demo mode must not create or impersonate a Supabase session.
+- Demo mode must not call authenticated patient or caregiver API routes.
+- Never upload, sync, or mix `TEST DATA — DELETE ME` into a real account.
+- Do not reuse demo state, demo IDs, or demo storage keys when a user signs in to a live account.
+- On switching between demo and live account, clear or isolate all account-specific client cache and pending mutations before displaying another account’s data.
+- Show a persistent visible “DEMO — SAMPLE DATA” banner while in demo mode.
+- Make demo sign-out/exit clear that local demo state without signing out a real account.
+- Never let demo mode fall through to real patient API requests when connectivity returns.
+
+Google sign-in:
+
+- Implement a Google button only if the web callback flow is supported by the API and configured provider.
+- Reuse the existing `/api/auth/google/start` flow where appropriate; do not put OAuth client secrets in the browser.
+- Keep a clear email/password path.
+- If Google provider configuration is incomplete, show a useful “Google sign-in is not configured yet” message instead of a broken or misleading button.
+- Follow the existing project’s pending Google setup status; do not represent it as complete.
+
+## Visual direction
+
+Create a calm, clear, trustworthy family-care interface. It should feel reassuring and human, not like a hospital records system or a generic analytics dashboard.
+
+Use the existing Medha mobile visual language:
+
+- Warm off-white page background.
+- Deep teal and navy as primary colors.
+- Sage green for safe/completed states.
+- Soft peach for gentle reminders and caution.
+- Dark, readable text and clear contrast.
+- Rounded cards, light borders, restrained shadows, generous spacing.
+- Large headings and comfortable body text.
+- Friendly, direct language.
+- Simple charts only when they help explain a trend.
+- Avoid alarmist red except for an active urgent safety event.
+
+Use shared design tokens from the current Medha app if available. Do not invent a conflicting brand palette.
+
+Accessibility:
+
+- Use semantic HTML and WCAG-aware color contrast.
+- Make normal body text at least 16px where practical.
+- Provide large controls and touch targets.
+- Support keyboard navigation and visible focus states.
+- Include labels for icon-only buttons and chart summaries.
+- Do not use color alone to communicate status.
+- Support responsive zoom and a high-contrast option.
+
+Responsive behavior:
+
+- Desktop: persistent sidebar with a clear patient selector and main content area.
+- Tablet: compact or collapsible navigation, generally two-column content.
+- Mobile browser: single-column pages, compact menu or bottom navigation, full-width actions.
+
+## Application shell and routes
+
+Create an authenticated shell with:
+
+- Medha logo/name.
+- Selected patient and patient switcher.
+- Current caregiver name and role.
+- Notification indicator.
+- Account menu and sign-out.
+- Connection/sync status.
+- Persistent DEMO banner when using local demo.
+
+Suggested routes:
+
+- `/sign-in`
+- `/overview`
+- `/patients`
+- `/patients/:patientId/overview`
+- `/patients/:patientId/care-plan`
+- `/patients/:patientId/safety`
+- `/patients/:patientId/voice-diary`
+- `/patients/:patientId/memory`
+- `/patients/:patientId/progress`
+- `/patients/:patientId/reports`
+- `/access`
+- `/settings`
+
+Protect private routes. Unauthenticated users go to sign-in. Authenticated caregivers without linked patients should see a useful “No patients are linked to your account yet” state and an access-request action.
+
+## Sign-in and caregiver access
+
+Build a caregiver-specific sign-in experience using the existing API. Support account restoration, session refresh, sign-out, and understandable error messages.
+
+For browser security, do not store long-lived refresh tokens in localStorage. Inspect the existing mobile bearer-token implementation, then implement an appropriate web session strategy. Prefer secure, HttpOnly, SameSite cookies managed by the Express API for browser sessions, while preserving mobile bearer-token support. If cookie support is not yet available, make the required API changes rather than silently falling back to unsafe persistent browser storage.
+
+Do not assume a caregiver can access a patient simply because they know a patient ID. The server must verify an active caregiver-patient relationship for every request.
+
+## Overview dashboard
+
+Title: “Good morning, [Caregiver Name]”
+
+Subtitle: “Here is how [Patient Name] is doing today.”
+
+Show a calm summary of:
+
+- Patient status and last synchronized time.
+- Care-plan completion today.
+- Completed, pending, and overdue tasks.
+- Next important reminder.
+- Medication and hydration reminders.
+- Recent voice diary entry.
+- Recent safety events.
+- Recent cognitive game activity.
+- Connection state and any pending sync.
+
+Prioritize the next useful action. Avoid excessive numbers and charts. Urgent safety events must be prominent, but routine reminders should remain calm.
+
+## Patient selector
+
+Show only patients returned by the authenticated caregiver API. Each patient item can show:
+
+- Name and initials/avatar.
+- Relationship to caregiver.
+- Safety status.
+- Last activity/sync time.
+
+Switching patients must reload data scoped to that patient and clear prior patient-specific caches from the active view. Never derive access from a client-supplied patient ID alone.
+
+## Care plan
+
+Display tasks as an accessible daily timeline or grouped list. Categories:
+
+- Medicine
+- Hydration
+- Routine
+- Appointment
+
+Each task should show title, schedule, recurrence, status, completion time if present, and who created or changed it when available.
+
+Actions should follow permissions:
+
+- Mark complete.
+- Snooze.
+- Add task.
+- Edit task.
+- Delete task.
+- Filter by date, category, or status.
+
+Confirm destructive actions. Explain failures and allow safe retries. Never report a change as saved until the API confirms it or it is clearly labeled as pending/offline.
+
+## Safety
+
+Provide a separate, easy-to-find safety page. Display:
+
+- Current safety state.
+- Open SOS events.
+- Geofence alerts.
+- Suspected fall or inactivity events, if supplied by the backend.
+- Event time and source.
+- Location only when available and authorized.
+- Status: Open, Acknowledged, or Resolved.
+- Caregiver responsible and event history.
+
+Actions:
+
+- Acknowledge an event.
+- Mark resolved.
+- Contact the patient using available contact details.
+- Notify another linked caregiver if that capability exists.
+- Review safe-zone details.
+
+Do not imply that geofencing, location, inactivity monitoring, or fall detection is active or reliable unless the API returns a verified event. Do not expose precise location to unauthorized accounts.
+
+## Voice diary
+
+Show diary entries newest first, with:
+
+- Date and time.
+- Transcript.
+- Language.
+- Audio playback only when an authorized audio file exists.
+- Possible task suggested by AI.
+- Transcription/audio sync state.
+
+Clearly label AI-extracted tasks as suggestions until a caregiver confirms them. Do not present AI-generated content as medical advice.
+
+## Memory assistant
+
+Organize memory cues into:
+
+- People
+- Places
+- Routines
+
+Each cue should show title, detail, icon/image if available, updated time, and author when available. Authorized caregivers can add, edit, and archive cues. Use gentle wording such as “Familiar people,” “Important places,” and “Daily routines.”
+
+## Cognitive activity
+
+Summarize:
+
+- Recent game sessions.
+- Practice frequency.
+- Recent and best scores.
+- Simple weekly activity trends.
+
+Do not diagnose dementia, infer clinical status, or make medical claims from game performance. Use wording such as “Recent practice” and “Patterns to discuss with the care team.”
+
+## Reports
+
+Provide authorized views of care-plan completion, reminders, voice diary history, cognitive activity, and safety-event history. Export only where permissions and backend support allow. Show privacy messaging and log sensitive report access through the API.
+
+## Patient access management
+
+Build an access page using caregiver-patient links:
+
+- List linked patients and relationship.
+- Request access to a patient.
+- Show Pending, Active, or Revoked status.
+- Show when access was granted, if available.
+- Revoke a link where the caregiver is authorized.
+- Explain that a patient or authorized administrator may need to approve access.
+
+Access changes must be validated server-side and audited. Never grant patient access with frontend-only logic.
+
+## Connection architecture
+
+Use this architecture:
+
+  Medha Caregiver Web Portal
+            |
+            | HTTPS, authenticated browser session
+            v
+  Existing Express API server
+            |
+            | Server-side Supabase connector / user-scoped authorization
+            v
+  Supabase Auth + PostgreSQL + Storage
+
+The browser must not connect directly to Supabase using a service-role key. Keep credentials and privileged database operations on the server.
+
+The existing patient `/api/me/*` endpoints only represent the current patient’s own account. Add caregiver-specific routes to the Express API; do not weaken or repurpose patient self-service routes.
+
+Suggested caregiver endpoints:
+
+- `GET /api/caregiver/patients`
+- `GET /api/caregiver/patients/:patientId/snapshot`
+- `GET /api/caregiver/patients/:patientId/tasks`
+- `POST /api/caregiver/patients/:patientId/tasks`
+- `PATCH /api/caregiver/patients/:patientId/tasks/:taskId`
+- `DELETE /api/caregiver/patients/:patientId/tasks/:taskId`
+- `GET /api/caregiver/patients/:patientId/notifications`
+- `GET /api/caregiver/patients/:patientId/diary`
+- `GET /api/caregiver/patients/:patientId/memory-cues`
+- `POST /api/caregiver/patients/:patientId/memory-cues`
+- `PATCH /api/caregiver/patients/:patientId/memory-cues/:cueId`
+- `GET /api/caregiver/patients/:patientId/game-progress`
+- `GET /api/caregiver/patients/:patientId/safety-events`
+- `PATCH /api/caregiver/patients/:patientId/safety-events/:eventId`
+- `GET /api/caregiver/patients/:patientId/reports`
+- `GET /api/caregiver/access`
+- `POST /api/caregiver/access-requests`
+- `PATCH /api/caregiver/access/:linkId`
+
+Use existing database tables where suitable:
+
+- `profiles`
+- `patient_profiles`
+- `caregiver_patient_links`
+- `care_tasks`
+- `notifications`
+- `voice_diary_entries`
+- `game_sessions`
+- `memory_cues`
+- `safe_zones`
+- `safety_events`
+- `medical_reports`
+- `audit_logs`
+
+For every patient-specific API request:
+
+1. Authenticate the user.
+2. Confirm the user is an active caregiver (or another explicitly allowed role).
+3. Confirm an active caregiver-patient link for the requested patient.
+4. Apply least-privilege rules to the requested action.
+5. Use Supabase Row Level Security and server-side checks as appropriate.
+6. Return only fields the caregiver is allowed to see.
+7. Audit sensitive actions.
+
+Validate request bodies and route parameters. Do not trust a patient ID, role, or permission sent by the browser. Avoid leaking database errors, tokens, or personal health data in logs.
+
+## Frontend implementation guidance
+
+Use the existing workspace conventions. If there is no established web stack for this artifact, use:
+
+- React + TypeScript + Vite.
+- React Router.
+- TanStack Query for server state.
+- Zod for API payload validation.
+- Recharts for a few simple, accessible charts if needed.
+- Existing Medha design tokens and reusable UI patterns.
+
+Keep the web artifact separate from the mobile app but reuse the Express API. Create a small typed API client rather than scattering `fetch` calls through UI components.
+
+Support:
+
+- Loading skeletons.
+- Empty states.
+- Error states with retry.
+- Offline/connection banners.
+- Pending mutation labels.
+- Safe optimistic updates only where appropriate.
+- Query invalidation after successful mutations.
+- Short polling for safety events (for example every 30–60 seconds while the safety view is active), using the API and free-tier infrastructure.
+
+Do not add paid services, realtime infrastructure, or new vendors unless explicitly approved. Start with ordinary authenticated API requests and polling.
+
+## Fake data and development mode
+
+All synthetic records must be labeled `TEST DATA — DELETE ME` or `DEMO — SAMPLE DATA`.
+
+Demo data must be local-only, use a separate storage namespace, have no real session, and never be sent to live endpoints. Keep demo/live account state and query caches isolated. Never merge synthetic data into real patient views.
+
+If a live caregiver has no linked patients, show the real empty state rather than substituting demo patients.
+
+## Error, empty, and offline states
+
+Design clear states for:
+
+- No linked patients.
+- Access request pending or denied.
+- No tasks today.
+- No diary entries.
+- No memory cues.
+- No safety events.
+- Offline connection.
+- Pending changes.
+- Expired session.
+- Unauthorized patient access.
+- Failed synchronization.
+- API unavailable.
+- Google sign-in not configured.
+
+Use plain language, for example:
+
+- “No patients are linked to your account yet.”
+- “Your changes are waiting to sync.”
+- “You don’t have permission to view this patient.”
+- “Google sign-in is not configured yet. You can still sign in with email.”
+
+## Definition of done
+
+The portal is complete when:
+
+- It exists as a separate web artifact and does not break the Expo mobile artifact.
+- A caregiver can sign in using a real account.
+- The local demo is clearly separate from live sign-in and never contacts live data routes.
+- Google sign-in is either tested and configured or clearly shown as not available yet.
+- A caregiver can see only patients linked to that account.
+- Patient switching cannot leak cached data between patients.
+- The dashboard and patient pages load data through the Express API.
+- Care-plan tasks can be managed according to server-enforced permissions.
+- Safety events are visible and can be acknowledged where supported.
+- Voice diary, memory cues, and cognitive activity are shown accurately.
+- Offline, pending, loading, empty, and error states are implemented.
+- Unauthorized access attempts are rejected by the server.
+- Test/demo data is visibly labeled and never synced to real accounts.
+- The layout works on desktop, tablet, and mobile browsers.
+- No Supabase service key or other secret is present in browser code.
+- Typecheck/build pass, API and app workflows run, and the portal is smoke-tested.
+
+Before finishing, report which caregiver routes and database permissions were added, what needs manual Supabase SQL Editor application, and whether Google OAuth is configured or still pending.
+
+============================== END PROMPT ==============================

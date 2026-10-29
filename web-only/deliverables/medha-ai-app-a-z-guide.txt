@@ -1,0 +1,582 @@
+MEDHA AI COGNITIVE CARE
+COMPLETE A-Z APP WORKING GUIDE
+============================================================
+
+Document status: Current MVP implementation guide
+Prepared: 03 September 2026
+
+IMPORTANT STATUS
+----------------
+Medha AI is currently a functional patient-facing MVP and testing
+application. It is not yet a production medical, emergency-response,
+or unattended-care system.
+
+The current build uses local device storage for patient data and has
+an Express API server for Gemini voice transcription. Supabase sync,
+authentication, a caregiver web portal, remote alerts, SMS escalation,
+and full background safety monitoring are not connected in this version.
+
+
+A - ACCESSIBILITY
+-----------------
+The interface is designed for elderly users:
+
+- Large readable headings and high-contrast controls.
+- Calm navy, emerald, cream, peach, and sunlight color palette.
+- Large touch targets and simple labels.
+- No timer in the memory game.
+- Voice prompts and higher-contrast settings are available in More.
+- The microphone button can be moved to the easiest corner of the screen.
+
+The current settings include:
+
+- English
+- Assamese
+- Hindi
+- Voice prompts on/off
+- Higher contrast on/off
+- Microphone position:
+  bottom-left, bottom-right, top-left, or top-right
+
+
+B - BACKEND
+-----------
+The backend is an Express 5 API located at:
+
+    artifacts/api-server
+
+The API is mounted below:
+
+    /api
+
+Current endpoints:
+
+    GET  /api/healthz
+    POST /api/voice/transcribe
+
+The voice endpoint accepts:
+
+    {
+      "audioBase64": "base64 audio data",
+      "mimeType": "audio/m4a",
+      "languageHint": "Assamese, Hindi, or English"
+    }
+
+The server validates the request, limits inline audio to approximately
+8 MB, sends the audio to Gemini, and returns:
+
+    {
+      "transcript": "spoken text",
+      "language": "detected language",
+      "possibleTask": {
+        "title": "task title",
+        "time": "task time",
+        "recurrence": "task recurrence"
+      }
+    }
+
+possibleTask is null when no clear reminder or future task is found.
+
+
+C - CARE PLAN
+------------
+The Home screen shows the daily care plan:
+
+- Morning medicine
+- Hydration
+- Morning walk
+- Family doctor appointment
+
+Each task has:
+
+- A time
+- A category
+- A familiar icon
+- Complete action
+- Snooze action
+
+Task state is persisted locally on the phone.
+
+Tasks created from Voice Diary are shown for confirmation before they are
+added to the care plan.
+
+
+D - DATA STORAGE
+----------------
+The current mobile app stores its local state with AsyncStorage.
+
+Stored local information includes:
+
+- Patient profile
+- Daily tasks
+- Notifications
+- Voice diary transcripts
+- Local audio file references
+- Game progress
+- App settings
+- Test-data status
+
+The local storage key is:
+
+    @medha-ai/app-state
+
+This is device-local storage. It is not yet a shared patient database.
+Clearing app data or uninstalling the application may remove this data.
+
+
+E - EMERGENCY AND SOS
+---------------------
+The Safety screen is available from:
+
+    Home -> Where am I? Help
+    More -> SOS Mode
+
+Current SOS flow:
+
+1. Patient opens the safety screen.
+2. Patient taps "Where am I? Help".
+3. The app displays a calm reassurance screen.
+4. A Good Samaritan can tap "Show this screen for help".
+5. The app displays the patient's name, age, languages, home address,
+   and caregiver call action.
+6. The caregiver can be called with the phone's native phone app.
+7. The patient can tap "I am safe now" to close SOS mode.
+
+Current limitations:
+
+- Remote caregiver notification is not connected.
+- SMS fallback is not connected.
+- Automatic fall or inactivity detection is not connected.
+- Background geofence escalation is not production-ready.
+
+Do not rely on this MVP as the only emergency response system.
+
+
+F - FAKE PATIENT DATABASE
+-------------------------
+The app includes a clearly isolated fake test profile:
+
+    TEST DATA — DELETE ME
+
+Test patient:
+
+    Name: Ramesh Barua
+    Age: 72
+    Region: Guwahati, Assam
+    Languages: Assamese, Hindi, English
+    Caregiver: Ananya Barua
+    Relationship: Daughter
+    Test ID: TEST-PATIENT-001
+
+The test data includes:
+
+- Daily care-plan tasks
+- Two notifications
+- One sample voice diary transcript
+- Sample game progress
+- Caregiver and home information
+
+The test profile is intentionally visible on Home, Voice Diary, Memory,
+Safety, Medical Reports, and More screens.
+
+
+G - GAMES
+---------
+The Games tab contains a functional memory-pair game called:
+
+    Find the pairs
+
+How it works:
+
+1. Tap a hidden card.
+2. Tap a second hidden card.
+3. Matching cards stay open.
+4. Non-matching cards close after a short pause.
+5. The game ends when all pairs are found.
+6. A score is calculated from the number of mistakes.
+
+The game has no countdown timer. Sessions, last score, and best score are
+stored locally.
+
+
+H - HOME
+--------
+Home is the main patient entry point.
+
+It contains:
+
+- Date and greeting
+- Test-data warning when the fake profile is active
+- Daily rhythm and streak display
+- Care-plan tasks
+- Notification indicator
+- Gentle note from the diary or default guidance
+- Safety entry point
+- Persistent microphone button
+
+The current greeting uses the active local patient profile.
+
+
+I - INSTALLATION
+----------------
+For development in the Replit workspace:
+
+1. Install dependencies:
+
+       pnpm install
+
+2. Start the Expo mobile workflow:
+
+       pnpm --filter @workspace/medha-ai run dev
+
+3. Start the API workflow separately:
+
+       pnpm --filter @workspace/api-server run dev
+
+4. Open the Expo preview or scan the Expo QR code with Expo Go.
+
+For an Android APK:
+
+- A native Expo/EAS build is required.
+- The production API URL must be configured in the build.
+- The API server must be deployed and reachable by the phone.
+- Android microphone, location, notification, and background permissions
+  must be accepted and tested on a real device.
+
+
+J - JOURNEY THROUGH THE APP
+---------------------------
+Typical patient journey:
+
+1. Open Home.
+2. Read the day's care plan.
+3. Complete or snooze a task.
+4. Open Games for memory practice.
+5. Open Voice Diary and record a note.
+6. Wait for Gemini transcription when online.
+7. Review any possible reminder.
+8. Tap Add only after confirming the reminder.
+9. Open Memory Assistant for familiar people, places, and routines.
+10. Use Safety/SOS when help is needed.
+11. Use More for settings, alarms, reports, and test-data management.
+
+
+K - KEY SOURCE FILES
+--------------------
+Mobile application:
+
+    artifacts/medha-ai/app/(tabs)/index.tsx
+    artifacts/medha-ai/app/(tabs)/games.tsx
+    artifacts/medha-ai/app/(tabs)/voice.tsx
+    artifacts/medha-ai/app/(tabs)/memory.tsx
+    artifacts/medha-ai/app/(tabs)/more.tsx
+    artifacts/medha-ai/app/safety.tsx
+    artifacts/medha-ai/app/reports.tsx
+
+Shared state:
+
+    artifacts/medha-ai/context/AppContext.tsx
+
+Fake patient records:
+
+    artifacts/medha-ai/data/testPatientData.ts
+
+Test-data warning:
+
+    artifacts/medha-ai/components/TestDataBanner.tsx
+
+Local notifications:
+
+    artifacts/medha-ai/services/notifications.ts
+
+API:
+
+    artifacts/api-server/src/app.ts
+    artifacts/api-server/src/routes/voice.ts
+    artifacts/api-server/src/routes/index.ts
+
+API contract:
+
+    lib/api-spec/openapi.yaml
+
+
+L - LANGUAGES
+------------
+The settings allow the user to select:
+
+- English
+- Assamese
+- Hindi
+
+Voice transcription sends these languages as a hint to Gemini. Full
+translated interface text and localized voice output are future work.
+
+
+M - MEMORY ASSISTANT
+--------------------
+Memory Assistant provides three groups of familiar cues:
+
+- People
+- Places
+- Routines
+
+The current fake profile shows:
+
+- Ananya Barua as the primary caregiver
+- Home in Zoo Road, Guwahati
+- State Zoo Gate as a familiar landmark
+- Morning medicine
+- Family doctor appointment
+
+These are test records and are labeled as test data.
+
+
+N - NOTIFICATIONS
+-----------------
+The app includes local notification support through expo-notifications.
+
+The Notifications & alarms setting:
+
+- Requests notification permission on supported mobile devices.
+- Schedules a short reminder preview for testing.
+- Updates the local notification setting.
+
+The current reminder preview is a test action. Production repeating
+medicine, hydration, appointment, geofence, and SOS schedules still need
+device testing and caregiver configuration.
+
+
+O - OFFLINE BEHAVIOR
+--------------------
+The first mobile build is offline-first for local patient use.
+
+Offline-capable behavior includes:
+
+- Viewing local tasks
+- Completing and snoozing tasks
+- Playing the memory game
+- Changing settings
+- Saving recorded audio locally
+- Saving local diary notes
+- Viewing local reports
+
+Gemini transcription requires network access. If transcription fails, the
+recording is kept locally and the app displays an offline message.
+
+Automatic server synchronization is not implemented yet.
+
+
+P - PERMISSIONS
+---------------
+The app may request:
+
+- Microphone permission for Voice Diary
+- Notification permission for local alarms
+- Foreground location permission for the home boundary
+- Background location permission for future safety monitoring
+
+Permission denial should not be treated as an emergency failure.
+The current app shows a recovery message or opens phone settings when
+appropriate.
+
+
+Q - QUALITY STATUS
+------------------
+The current source has passed:
+
+- Mobile TypeScript check
+- API server TypeScript check
+- Shared library typecheck
+- API code generation
+- API health smoke test
+- Invalid voice-payload validation test
+- Expo preview rendering checks
+
+The Expo workflow also logs a non-blocking React Native DevTools warning
+when a Linux glib library is unavailable. Metro and the app still load.
+
+
+R - REPORTS
+----------
+Medical Reports is a read-only patient-facing screen.
+
+Current sample reports:
+
+- Care plan summary
+- Cognitive practice overview
+
+The reports screen explains that the records are local prototype data and
+are not shared without caregiver setup.
+
+Production medical-record storage, encryption, role-based access, and
+caregiver sharing are not implemented.
+
+
+S - SECURITY AND PRIVACY
+------------------------
+Important security rules:
+
+- Never place GEMINI_API_KEY inside the mobile application.
+- The Gemini key belongs on the API server as a Replit secret.
+- Never paste API keys or credentials into source code.
+- Do not use the fake test profile as real medical data.
+- Do not publish the sample caregiver phone number as a real contact.
+- Production patient records require authentication and access controls.
+
+The current API server does not yet provide full patient authentication or
+caregiver authorization.
+
+
+T - TEST DATA DELETE PROCESS
+----------------------------
+To delete the fake profile:
+
+1. Open More.
+2. Scroll to Test patient database.
+3. Confirm that the card says:
+
+       TEST DATA — DELETE ME
+
+4. Tap Delete test data.
+5. Confirm the destructive prompt.
+
+The delete action removes the test profile, test tasks, test notifications,
+test diary notes, and test game progress from local storage.
+
+To restore the test process:
+
+1. Return to More.
+2. Open Test patient database.
+3. Tap Reload test data.
+
+The delete and reload actions are separate from any future Supabase
+database and do not delete remote production records.
+
+
+U - USER ROLES
+--------------
+Current role:
+
+- Patient-facing mobile user
+
+Future roles:
+
+- Caregiver
+- Family member
+- Care team or clinician
+
+The caregiver web portal, login system, and role permissions are not part
+of the current MVP.
+
+
+V - VOICE DIARY
+---------------
+Voice Diary works as follows:
+
+1. Open the Voice tab.
+2. Tap Start a voice note.
+3. Approve microphone permission.
+4. Speak naturally.
+5. Tap Stop.
+6. The audio file is saved locally.
+7. The app sends a base64 copy to the API when online.
+8. Gemini returns a transcript and possible task.
+9. The transcript is saved with the local audio reference.
+10. A possible task is displayed for patient confirmation.
+11. Tap Add to create the reminder.
+
+If the API or network is unavailable, the app keeps the audio locally and
+saves an offline note.
+
+
+W - WORKFLOWS AND COMMANDS
+--------------------------
+Configured workflows:
+
+- Expo mobile preview:
+      artifacts/medha-ai: expo
+
+- API server:
+      artifacts/api-server: API Server
+
+- Mockup sandbox:
+      artifacts/mockup-sandbox: Component Preview Server
+
+Useful commands:
+
+    pnpm run typecheck
+    pnpm run build
+    pnpm --filter @workspace/api-spec run codegen
+    pnpm --filter @workspace/medha-ai run typecheck
+    pnpm --filter @workspace/api-server run typecheck
+
+
+X - EXPORT AND SOURCE PACKAGE
+-----------------------------
+The complete source package is provided as:
+
+    deliverables/medha-ai-complete-source.zip
+
+The ZIP contains:
+
+- Expo mobile source
+- Express API source
+- Shared API contract
+- Generated API client files
+- Assets
+- Package manifests
+- pnpm lockfile
+- Test patient database code
+
+Dependency folders, caches, build output, logs, and secrets are excluded.
+
+
+Y - YOUR NEXT STEPS
+-------------------
+For basic testing:
+
+1. Open the Expo preview.
+2. Confirm the TEST DATA — DELETE ME banner.
+3. Complete a care-plan task.
+4. Play Find the pairs.
+5. Record a Voice Diary note.
+6. Test Reload test data.
+7. Test Delete test data.
+8. Reload the test data and repeat.
+9. Test the Safety screen without treating it as a real emergency service.
+
+Before real patient use:
+
+- Connect Supabase or another protected database.
+- Add authentication.
+- Add caregiver permissions.
+- Deploy the API securely.
+- Configure a production API URL for APK builds.
+- Implement remote alerts and SMS/push escalation.
+- Validate background geofencing and alarms on Android and iOS.
+- Replace all sample profile and caregiver data.
+- Complete medical privacy and security review.
+
+
+Z - ZERO-CONFUSION PRODUCTION WARNING
+--------------------------------------
+Any record marked:
+
+    TEST DATA — DELETE ME
+
+is fake data for demonstration and process testing.
+
+Do not interpret:
+
+- Ramesh Barua as a real patient
+- Ananya Barua as a real caregiver
+- The sample address as a real location
+- The sample phone number as a production contact
+- The sample medical reports as clinical records
+
+The current app is suitable for demonstration, development, and controlled
+testing. It must not be the sole system used for real medical supervision,
+medication safety, wandering response, or emergency care.
+
+END OF GUIDE
+============================================================
